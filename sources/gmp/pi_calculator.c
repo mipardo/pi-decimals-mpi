@@ -2,17 +2,17 @@
 #include <stdlib.h>
 #include <gmp.h>
 #include <time.h>
-#include "mpi.h"
 #include <stdbool.h>
-#include "Algorithms/BBP.h"
-#include "Algorithms/Bellard.h"
-#include "Algorithms/Chudnovsky.h"
-#include "Check_Decimals.h"
-#include "../Common/Printer.h"
-
+#include "mpi.h"
+#include "algorithms/bbp.h"
+#include "algorithms/bellard.h"
+#include "algorithms/chudnovsky.h"
+#include "check_decimals.h"
+#include "../common/printer.h"
 
 
 double gettimeofday();
+
 
 void check_errors_gmp(int num_procs, int precision, int num_iterations, int num_threads, int proc_id, int algorithm){
     if (precision <= 0){
@@ -103,12 +103,8 @@ void calculate_pi_gmp(int num_procs, int proc_id, int algorithm, int precision, 
         gettimeofday(&t2, NULL);
         execution_time = ((t2.tv_sec - t1.tv_sec) * 1000000u +  t2.tv_usec - t1.tv_usec)/1.e6; 
         decimals_computed = check_decimals_gmp(pi);
-        if (print_in_csv_format) {
-            print_results_csv("GMP", algorithm_type, precision, num_iterations, num_procs, num_threads, decimals_computed, execution_time);
-        } 
-        else {
-            print_results("GMP", algorithm_type, precision, num_iterations, num_procs, num_threads, decimals_computed, execution_time);
-        }
+        if (print_in_csv_format) { print_results_csv("GMP", algorithm_type, precision, num_iterations, num_procs, num_threads, decimals_computed, execution_time); } 
+        else { print_results("GMP", algorithm_type, precision, num_iterations, num_procs, num_threads, decimals_computed, execution_time); }
         mpf_clear(pi);
     }
 

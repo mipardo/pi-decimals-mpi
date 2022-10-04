@@ -3,8 +3,10 @@
 #include <string.h>
 #include <stdbool.h>
 #include "mpi.h"
-#include "Printer.h"
-#include "../GMP/Pi_Calculator.h"
+#include "printer.h"
+#include "../gmp/pi_calculator.h"
+#include "../mpfr/pi_calculator.h"
+
 
 
 int incorrect_params(char* exec_name){
@@ -28,9 +30,7 @@ int main(int argc, char **argv){
         print_in_csv_format = true;    
     } 
     else if (argc == 5) {
-        if (proc_id == 0) {
-            print_title();
-        } 
+        if (proc_id == 0) { print_title(); } 
         print_in_csv_format = false;
     }
     else {
@@ -49,7 +49,7 @@ int main(int argc, char **argv){
         calculate_pi_gmp(num_procs, proc_id, algorithm, precision, num_threads, print_in_csv_format);
     } 
     else if (strcmp(library, "MPFR") == 0) {
-        //calculate_pi_mpfr(algorithm, precision, num_threads, print_in_csv_format);
+        calculate_pi_mpfr(num_procs, proc_id, algorithm, precision, num_threads, print_in_csv_format);
     } 
     else 
     {

@@ -3,7 +3,7 @@
 #include <gmp.h>
 #include <omp.h>
 #include "mpi.h"
-#include "MPI_Operations.h"
+#include "../mpi_operations.h"
 
 #define A 13591409
 #define B 545140134
@@ -67,8 +67,8 @@ int * get_distribution(int num_procs, int proc_id, int num_threads, int thread_i
     float working_ratios[160][41], my_working_ratio;
 
     //Open the working_ratios file 
-    ratios_file = fopen("Resources/working_ratios.txt", "r");
-    if(ratios_file == NULL){
+    ratios_file = fopen("resources/working_ratios.txt", "r");
+    if (ratios_file == NULL) { 
         printf("working_ratios.txt not found \n");
         MPI_Finalize();
         exit(-1);
@@ -120,7 +120,7 @@ int * get_distribution(int num_procs, int proc_id, int num_threads, int thread_i
  * This method is used by ParallelChudnovskyAlgorithm procs
  * for computing the first value of dep_a
  */
-void init_dep_a(mpf_t dep_a, int block_start){
+void init_dep_a_gmp(mpf_t dep_a, int block_start){
     mpz_t factorial_n, dividend, divisor;
     mpf_t float_dividend, float_divisor;
     mpz_inits(factorial_n, dividend, divisor, NULL);
@@ -179,7 +179,7 @@ void chudnovsky_algorithm_gmp(int num_procs, int proc_id, mpf_t pi,
 
         mpf_init_set_ui(local_thread_pi, 0);    // private thread pi
         mpf_inits(dep_a, dep_b, dep_a_dividend, dep_a_divisor, aux, NULL);
-        init_dep_a(dep_a, thread_block_start);
+        init_dep_a_gmp(dep_a, thread_block_start);
         mpf_pow_ui(dep_b, c, thread_block_start);
         mpf_init_set_ui(dep_c, B);
         mpf_mul_ui(dep_c, dep_c, thread_block_start);
@@ -218,7 +218,7 @@ void chudnovsky_algorithm_gmp(int num_procs, int proc_id, mpf_t pi,
     
     //Create user defined operation
     MPI_Op add_op;
-    MPI_Op_create((MPI_User_function *)add, 0, &add_op);
+    MPI_Op_create((MPI_User_function *)add_gmp, 0, &add_op);
 
     //Set buffers for cumunications and position for pack and unpack information 
     packet_size = 8 + sizeof(mp_exp_t) + ((local_proc_pi -> _mp_prec + 1) * sizeof(mp_limb_t));
@@ -226,14 +226,14 @@ void chudnovsky_algorithm_gmp(int num_procs, int proc_id, mpf_t pi,
     char sendbuffer[packet_size];
 
     //Pack local_proc_pi in sendbuffuer
-    position = pack(sendbuffer, local_proc_pi);
+    position = pack_gmp(sendbuffer, local_proc_pi);
 
     //Reduce local_proc_pi
     MPI_Reduce(sendbuffer, recbuffer, position, MPI_PACKED, add_op, 0, MPI_COMM_WORLD);
 
     //Unpack recbuffer in global Pi and do the last operations to get Pi
     if (proc_id == 0){
-        unpack(recbuffer, pi);
+        unpack_gmp(recbuffer, pi);
         mpf_sqrt(e, e);
         mpf_mul_ui(e, e, D);
         mpf_div(pi, e, pi); 

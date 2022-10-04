@@ -17,7 +17,7 @@ if [ "$#" -ne 0 ]; then
 fi
 
 # COMPILE
-error=$(mpicc -fopenmp -o PiDecimalsMPI.x Sources/Common/*.c Sources/GMP/*.c Sources/GMP/Algorithms/*.c -lgmp 2>&1 1>/dev/null)
+error=$(mpicc -fopenmp -o PiDecimalsMPI.x sources/common/*.c sources/gmp/*.c sources/gmp/algorithms/*.c sources/mpfr/*.c sources/mpfr/algorithms/*.c -lmpfr -lgmp -lm 2>&1 1>/dev/null)
 
 # GIVE FEEDBACK ABOUT COMPILATION
 if [[ -z "$error" ]]; then

@@ -1,5 +1,5 @@
-#ifndef PRINT_TITLE
-#define PRINT_TITLE
+#ifndef PRINTER
+#define PRINTER
 
 void print_title();
 void print_results(char *, char *, int, int, int, int, int, double);

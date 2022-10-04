@@ -3,7 +3,7 @@
 #include <gmp.h>
 #include <omp.h>
 #include "mpi.h"
-#include "MPI_Operations.h"
+#include "../mpi_operations.h"
 
 
 
@@ -43,7 +43,7 @@
 /*
  * An iteration of Bellard formula
  */
-void bellard_iteration(mpf_t pi, int n, mpf_t m, mpf_t a, mpf_t b, mpf_t c, mpf_t d, 
+void bellard_iteration_gmp(mpf_t pi, int n, mpf_t m, mpf_t a, mpf_t b, mpf_t c, mpf_t d, 
                     mpf_t e, mpf_t f, mpf_t g, mpf_t aux, int dep_a, int dep_b){
     mpf_set_ui(a, 32);              // a = ( 32 / ( 4n + 1))
     mpf_set_ui(b, 1);               // b = (  1 / ( 4n + 3))
@@ -124,7 +124,7 @@ void bellard_algorithm_gmp(int num_procs, int proc_id, mpf_t pi,
         //First Phase -> Working on a local variable
         #pragma omp parallel for
             for(i = block_start + thread_id; i < block_end; i+=num_threads){
-                bellard_iteration(local_thread_pi, i, dep_m, a, b, c, d, e, f, g, aux, dep_a, dep_b);
+                bellard_iteration_gmp(local_thread_pi, i, dep_m, a, b, c, d, e, f, g, aux, dep_a, dep_b);
                 // Update dependencies for next iteration:
                 next_i = i + num_threads;
                 mpf_mul_2exp(dep_m, ONE, 10 * next_i);
@@ -144,7 +144,7 @@ void bellard_algorithm_gmp(int num_procs, int proc_id, mpf_t pi,
 
     //Create user defined operation
     MPI_Op add_op;
-    MPI_Op_create((MPI_User_function *)add, 0, &add_op);
+    MPI_Op_create((MPI_User_function *)add_gmp, 0, &add_op);
 
     //Set buffers for cumunications and position for pack and unpack information
     packet_size = 8 + sizeof(mp_exp_t) + ((local_proc_pi -> _mp_prec + 1) * sizeof(mp_limb_t));
@@ -152,14 +152,14 @@ void bellard_algorithm_gmp(int num_procs, int proc_id, mpf_t pi,
     char sendbuffer[packet_size];
 
     //Pack local_proc_pi in sendbuffuer
-    position = pack(sendbuffer, local_proc_pi);
+    position = pack_gmp(sendbuffer, local_proc_pi);
 
     //Reduce piLocal
     MPI_Reduce(sendbuffer, recbuffer, position, MPI_PACKED, add_op, 0, MPI_COMM_WORLD);
 
     //Unpack recbuffer in global Pi and do the last operation
     if (proc_id == 0){
-        unpack(recbuffer, pi);
+        unpack_gmp(recbuffer, pi);
         mpf_div_ui(pi, pi, 64);
     }
 
