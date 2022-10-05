@@ -88,8 +88,7 @@ void bellard_iteration_gmp(mpf_t pi, int n, mpf_t m, mpf_t a, mpf_t b, mpf_t c, 
  * Finally, a collective reduction operation will be performed
  * using a user defined function in OperationsMPI. 
  */
-void bellard_algorithm_gmp(int num_procs, int proc_id, mpf_t pi, 
-                                int num_iterations, int num_threads){
+void bellard_algorithm_gmp(int num_procs, int proc_id, mpf_t pi, int num_iterations, int num_threads){
     int block_size, block_start, block_end, position, packet_size;
     mpf_t local_proc_pi, ONE;
 

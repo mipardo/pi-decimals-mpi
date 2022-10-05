@@ -151,8 +151,7 @@ void init_dep_a_gmp(mpf_t dep_a, int block_start){
  * Finally, a collective reduction operation will be performed 
  * using a user defined function in OperationsMPI. 
  */
-void chudnovsky_algorithm_gmp(int num_procs, int proc_id, mpf_t pi, 
-                                    int num_iterations, int num_threads){
+void chudnovsky_algorithm_gmp(int num_procs, int proc_id, mpf_t pi, int num_iterations, int num_threads){
     int packet_size, position; 
     mpf_t local_proc_pi, e, c;  
 

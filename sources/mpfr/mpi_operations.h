@@ -1,5 +1,5 @@
-#ifndef OPERATIONS_MPFR
-#define OPERATIONS_MPFR
+#ifndef MPI_OPERATIONS_MPFR
+#define MPI_OPERATIONS_MPFR
 
 void add_mpfr(void *, void *, int *, MPI_Datatype *);
 void mul_mpfr(void *, void *, int *, MPI_Datatype *);

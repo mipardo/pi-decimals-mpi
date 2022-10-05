@@ -5,9 +5,8 @@
 #include <stdbool.h>
 #include "mpi.h"
 #include "algorithms/bbp.h"
-#include "algorithms/bellard_v1.h"
 #include "algorithms/bellard.h"
-#include "algorithms/chudnovsky_v2.h"
+#include "algorithms/chudnovsky.h"
 #include "check_decimals.h"
 #include "../common/printer.h"
 
@@ -56,38 +55,30 @@ void calculate_pi_mpfr(int num_procs, int proc_id, int algorithm, int precision,
     case 0:
         num_iterations = precision * 0.84;
         check_errors_mpfr(num_procs, precision, num_iterations, num_threads, proc_id, algorithm);
-        algorithm_type = "BBP (Last version)";
+        algorithm_type = "BBP (Processes and threads distributes the iterations in blocks)";
         bbp_algorithm_mpfr(num_procs, proc_id, pi, num_iterations, num_threads, precision_bits);
         break;
 
     case 1:
         num_iterations = precision / 3;
         check_errors_mpfr(num_procs, precision, num_iterations, num_threads, proc_id, algorithm);
-        algorithm_type = "Bellard (First version)";
-        bellard_algorithm_v1_mpfr(num_procs, proc_id, pi, num_iterations, num_threads, precision_bits);
-        break;
-
-    case 2:
-        num_iterations = precision / 3;
-        check_errors_mpfr(num_procs, precision, num_iterations, num_threads, proc_id, algorithm);
-        algorithm_type = "Bellard (Last version)";
+        algorithm_type = "Bellard (Processes distributes the iterations in blocks and threads do it cyclically)";
         bellard_algorithm_mpfr(num_procs, proc_id, pi, num_iterations, num_threads, precision_bits);
         break;
 
-    case 3:
+    case 2:
         num_iterations = (precision + 14 - 1) / 14;  //Division por exceso
         check_errors_mpfr(num_procs, precision, num_iterations, num_threads, proc_id, algorithm);
-        algorithm_type = "Chudnovsky (Without all factorials)";
-        chudnovsky_algorithm_v2_mpfr(num_procs, proc_id, pi, num_iterations, num_threads, precision_bits);
+        algorithm_type = "Chudnovsky (Block distribution by processes and threads and using the simplified mathematical expression)";
+        chudnovsky_algorithm_mpfr(num_procs, proc_id, pi, num_iterations, num_threads, precision_bits);
         break;
 
     default:
         if (proc_id == 0){
             printf("  Algorithm selected is not correct. Try with: \n");
-            printf("      algorithm == 0 -> BBP (Last version) \n");
-            printf("      algorithm == 1 -> Bellard (First version) \n");
-            printf("      algorithm == 2 -> Bellard (Last version) \n");
-            printf("      algorithm == 3 -> Chudnovsky (Does not compute all factorials) \n");
+            printf("      algorithm == 0 -> BBP \n");
+            printf("      algorithm == 1 -> Bellard \n");
+            printf("      algorithm == 2 -> Chudnovsky \n");
             printf("\n");
         } 
         MPI_Finalize();

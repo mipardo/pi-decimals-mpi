@@ -67,30 +67,30 @@ void calculate_pi_gmp(int num_procs, int proc_id, int algorithm, int precision, 
     case 0:
         num_iterations = precision * 0.84;
         check_errors_gmp(num_procs, precision, num_iterations, num_threads, proc_id, algorithm);
-        algorithm_type = "BBP (Last version)";
+        algorithm_type = "BBP (Processes distributes the iterations in blocks and threads do it cyclically)";
         bbp_algorithm_gmp(num_procs, proc_id, pi, num_iterations, num_threads);
         break;
 
     case 1:
         num_iterations = precision / 3;
         check_errors_gmp(num_procs, precision, num_iterations, num_threads, proc_id, algorithm);
-        algorithm_type = "Bellard";
+        algorithm_type = "Bellard (Processes distributes the iterations in blocks and threads do it cyclically)";
         bellard_algorithm_gmp(num_procs, proc_id, pi, num_iterations, num_threads);
         break;
 
     case 2:
         num_iterations = (precision + 14 - 1) / 14;  //Division por exceso
         check_errors_gmp(num_procs, precision, num_iterations, num_threads, proc_id, algorithm);
-        algorithm_type = "Chudnovsky (Without all factorials)";
+        algorithm_type = "Chudnovsky (Block distribution by processes and threads and using the simplified mathematical expression)";
         chudnovsky_algorithm_gmp(num_procs, proc_id, pi, num_iterations, num_threads);
         break;
 
     default:
         if (proc_id == 0){
             printf("  Algorithm selected is not correct. Try with: \n");
-            printf("      algorithm == 0 -> BBP (Last version) \n");
+            printf("      algorithm == 0 -> BBP \n");
             printf("      algorithm == 1 -> Bellard \n");
-            printf("      algorithm == 2 -> Chudnovsky (Does not compute all factorials) \n");
+            printf("      algorithm == 2 -> Chudnovsky \n");
             printf("\n");
         } 
         MPI_Finalize();
