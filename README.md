@@ -5,7 +5,7 @@ To perform the operations it is used a floating point precision arithmetic libra
 
 This version has been developed for clusters. It can be used as a benchmark to compare and test the CPU performance in cluster environments. Processes are managed with MPI and threads are managed with OpenMP.
 
-<img src="https://user-images.githubusercontent.com/60443339/197704723-45147a75-c081-42d7-b2b6-0845b4c352d8.png" alt="drawing" height="100"/>
+<img src="https://user-images.githubusercontent.com/60443339/197706209-6482adfb-684a-4e26-bb21-4502c110a938.png" alt="drawing" height="100"/>
 
 <img src="https://user-images.githubusercontent.com/60443339/195342306-1eb14b7d-ce25-41a8-87b5-545011edf172.png" alt="drawing" height="100"/>
 
