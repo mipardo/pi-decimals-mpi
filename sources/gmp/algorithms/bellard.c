@@ -10,7 +10,7 @@
 /************************************************************************************
  * Miguel Pardo Navarro. 17/07/2021                                                 *
  * Bellard formula implementation                                                   *
- * This version allows computing Pi using processes and threads in hybrid way.      *                                             *
+ * This version allows computing Pi using processes and threads in hybrid way.      *                  
  *                                                                                  *
  ************************************************************************************
  * Bellard formula:                                                                 *
@@ -122,7 +122,7 @@ void bellard_algorithm_gmp(int num_procs, int proc_id, mpf_t pi, int num_iterati
 
         //First Phase -> Working on a local variable
         #pragma omp parallel for
-            for(i = block_start + thread_id; i < block_end; i+=num_threads){
+            for(i = block_start + thread_id; i < block_end; i += num_threads){
                 bellard_iteration_gmp(local_thread_pi, i, dep_m, a, b, c, d, e, f, g, aux, dep_a, dep_b);
                 // Update dependencies for next iteration:
                 next_i = i + num_threads;

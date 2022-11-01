@@ -7,6 +7,7 @@
 #include "algorithms/bbp.h"
 #include "algorithms/bellard.h"
 #include "algorithms/chudnovsky.h"
+#include "algorithms/chudnovsky_blocks_dist.h"
 #include "check_decimals.h"
 #include "../common/printer.h"
 
@@ -27,17 +28,6 @@ void check_errors_gmp(int num_procs, int precision, int num_iterations, int num_
         }
         MPI_Finalize();
         exit(-1);
-    }
-        if (algorithm == 2){ 
-            // Last version of Chudnovksy is more efficient when total threads are 2 or multiples of four
-            if ((num_procs * num_threads) > 2 && (num_procs * num_threads) % 4 != 0){
-                if (proc_id == 0){
-                    printf("  The last version of Chudnovksy is not eficient with %d processes and %d threads. \n", num_procs, num_threads);
-                    printf("  Try using 2 or multiples of four for the total threads\n\n");
-                }
-                MPI_Finalize();
-                exit(-1);
-            } 
     }
 }
 
@@ -81,9 +71,17 @@ void calculate_pi_gmp(int num_procs, int proc_id, int algorithm, int precision, 
     case 2:
         num_iterations = (precision + 14 - 1) / 14;  //Division por exceso
         check_errors_gmp(num_procs, precision, num_iterations, num_threads, proc_id, algorithm);
-        algorithm_type = "Chudnovsky (Block distribution by processes and threads and using the simplified mathematical expression)";
+        algorithm_type = "Chudnovsky (Processes and threads distributes the iterations in blocks while using the simplified mathematical expression)";
+        chudnovsky_algorithm_blocks_dist_gmp(num_procs, proc_id, pi, num_iterations, num_threads);
+        break;
+    
+    case 3:
+        num_iterations = (precision + 14 - 1) / 14;  //Division por exceso
+        check_errors_gmp(num_procs, precision, num_iterations, num_threads, proc_id, algorithm);
+        algorithm_type = "Chudnovsky (Processes distributes the iterations in blocks and threads do it cyclically while using the simplified mathematical expression)";
         chudnovsky_algorithm_gmp(num_procs, proc_id, pi, num_iterations, num_threads);
         break;
+
 
     default:
         if (proc_id == 0){

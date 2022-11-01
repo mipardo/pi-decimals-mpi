@@ -110,7 +110,7 @@ void bbp_algorithm_gmp(int num_procs, int proc_id, mpf_t pi, int num_iterations,
 
         //First Phase -> Working on a local variable        
         #pragma omp parallel for 
-            for(i = block_start + thread_id; i < block_end; i+=num_threads){    
+            for(i = block_start + thread_id; i < block_end; i += num_threads){    
                 bbp_iteration_gmp(local_thread_pi, i, dep_m, quot_a, quot_b, quot_c, quot_d, aux); 
                 // Update depencies: 
                 mpf_mul(dep_m, dep_m, jump);    
