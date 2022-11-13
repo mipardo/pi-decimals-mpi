@@ -78,18 +78,55 @@ void init_dep_a_gmp(mpf_t dep_a, int block_start){
     mpf_clears(float_dividend, float_divisor, NULL);
 }
 
-/*
- * Parallel Pi number calculation using the Chudnovsky algorithm
- * The number of iterations is divided by blocks 
- * so each process calculates a part of pi with multiple threads (or just one thread). 
- * Each process will split the iterations cyclically
- * among the threads to calculate its part.  
- * Finally, a collective reduction operation will be performed 
- * using a user defined function in OperationsMPI. 
- */
-void chudnovsky_algorithm_gmp(int num_procs, int proc_id, mpf_t pi, int num_iterations, int num_threads){
+
+void compute_dep_a_gmp(mpf_t dep_a, int iteration){
+    int i, factor_a;
+    mpf_t dividend, divisor, result;
+
+    mpf_inits(result, dividend, divisor, NULL);
+    mpf_set_ui(dep_a, 1);
+
+    for (i = 1; i <= iteration; i++) {
+        factor_a = 12 * (i - 1);
+        mpf_set_ui(dividend, factor_a + 10);
+        mpf_mul_ui(dividend, dividend, factor_a + 6);
+        mpf_mul_ui(dividend, dividend, factor_a + 2);
+
+        mpf_set_ui(divisor, i);
+        mpf_pow_ui(divisor, divisor, 3);
+        mpf_div(result, dividend, divisor);
+        mpf_mul(dep_a, dep_a, result);
+    }    
+
+    mpf_clears(result, dividend, divisor, NULL);
+}
+
+void compute_portion_of_dep_a_gmp(mpf_t dep_a, int next_i, int current_i){
+    int i, factor_a;
+    mpf_t result, dividend, divisor;
+
+    mpf_inits(result, dividend, divisor, NULL);
+
+    for (i = current_i + 1; i <= next_i; i++){
+        factor_a = 12 * (i - 1);
+        mpf_set_ui(dividend, factor_a + 10);
+        mpf_mul_ui(dividend, dividend, factor_a + 6);
+        mpf_mul_ui(dividend, dividend, factor_a + 2);
+
+        mpf_set_ui(divisor, i);
+        mpf_pow_ui(divisor, divisor, 3);
+        mpf_div(result, dividend, divisor);
+
+        mpf_mul(dep_a, dep_a, result);
+    } 
+
+    mpf_clears(result, dividend, divisor, NULL);
+}
+
+
+void chudnovsky_blocks_and_cyclic_algorithm_gmp(int num_procs, int proc_id, mpf_t pi, int num_iterations, int num_threads){
     int packet_size, position, block_size, block_start, block_end; 
-    mpf_t local_proc_pi, e, c;  
+    mpf_t local_proc_pi, e, c, jump;  
 
     block_size = (num_iterations + num_procs - 1) / num_procs;
     block_start = proc_id * block_size;
@@ -100,52 +137,38 @@ void chudnovsky_algorithm_gmp(int num_procs, int proc_id, mpf_t pi, int num_iter
     mpf_init_set_ui(e, E);
     mpf_init_set_ui(c, C);
     mpf_neg(c, c);
-    mpf_pow_ui(c, c, 3 * num_threads);
+    mpf_pow_ui(c, c, 3);
+    mpf_inits(jump, NULL);
+    mpf_pow_ui(jump, c, num_threads);
 
     //Set the number of threads 
     omp_set_num_threads(num_threads);
 
     #pragma omp parallel 
     {
-        int thread_id, i, factor_a;
-        mpf_t local_thread_pi, dep_a, dep_a_dividend, dep_a_divisor, dep_b, dep_c, aux;
+        int thread_id, i, j;
+        mpf_t local_thread_pi, dep_a, dep_b, dep_c, aux;
 
         thread_id = omp_get_thread_num();
        
         mpf_init_set_ui(local_thread_pi, 0);    // private thread pi
-        mpf_inits(dep_a, dep_b, dep_a_dividend, dep_a_divisor, aux, NULL);
-        init_dep_a_gmp(dep_a, block_start + thread_id);
+        mpf_inits(dep_a, dep_b, aux, NULL);
+        compute_dep_a_gmp(dep_a, block_start + thread_id);
         mpf_pow_ui(dep_b, c, block_start + thread_id);
         mpf_init_set_ui(dep_c, B);
         mpf_mul_ui(dep_c, dep_c, block_start + thread_id);
         mpf_add_ui(dep_c, dep_c, A);
-        factor_a = 12 * (block_start + thread_id);
 
         //First Phase -> Working on a local variable        
         #pragma omp parallel for 
             for(i = block_start + thread_id; i < block_end; i += num_threads){
-                if (thread_id == 0) {
-                    printf("#################### iteration: %i \n", i);
-                    gmp_printf("dep_a: %.Ff \n", dep_a);
-                    gmp_printf("dep_b: %.Ff \n", dep_b);
-                    gmp_printf("dep_c: %.Ff \n", dep_c);
-                    // El problema está en la primera iteración de las hebras distintas de cero ya que para ellas dep_a(i - 1) = 1  ??
-                } 
                 chudnovsky_iteration_gmp(local_thread_pi, i, dep_a, dep_b, dep_c, aux);
+
                 //Update dep_a:
-
-                factor_a = 12 * i; 
-                mpf_set_ui(dep_a_dividend, factor_a + 10);
-                mpf_mul_ui(dep_a_dividend, dep_a_dividend, factor_a + 6);
-                mpf_mul_ui(dep_a_dividend, dep_a_dividend, factor_a + 2);
-                mpf_mul(dep_a_dividend, dep_a_dividend, dep_a);
-
-                mpf_set_ui(dep_a_divisor, i + 1);
-                mpf_pow_ui(dep_a_divisor, dep_a_divisor, 3);
-                mpf_div(dep_a, dep_a_dividend, dep_a_divisor);
+                compute_portion_of_dep_a_gmp(dep_a, i + num_threads, i);
 
                 //Update dep_b:
-                mpf_mul(dep_b, dep_b, c);
+                mpf_mul(dep_b, dep_b, jump);
 
                 //Update dep_c:
                 mpf_add_ui(dep_c, dep_c, B * num_threads);
@@ -156,7 +179,7 @@ void chudnovsky_algorithm_gmp(int num_procs, int proc_id, mpf_t pi, int num_iter
         mpf_add(local_proc_pi, local_proc_pi, local_thread_pi);
 
         //Clear thread memory
-        mpf_clears(local_thread_pi, dep_a, dep_a_dividend, dep_a_divisor, dep_b, dep_c, aux, NULL);   
+        mpf_clears(local_thread_pi, dep_a, dep_b, dep_c, aux, NULL);   
     }
     
     //Create user defined operation
@@ -184,6 +207,6 @@ void chudnovsky_algorithm_gmp(int num_procs, int proc_id, mpf_t pi, int num_iter
 
     //Clear process memory
     MPI_Op_free(&add_op);
-    mpf_clears(local_proc_pi, e, c, NULL);
+    mpf_clears(local_proc_pi, e, c, jump, NULL);
 }
 

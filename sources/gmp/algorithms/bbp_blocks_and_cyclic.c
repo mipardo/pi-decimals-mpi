@@ -70,17 +70,7 @@ void bbp_iteration_gmp(mpf_t pi, int n, mpf_t dep_m, mpf_t quot_a, mpf_t quot_b,
 }
 
 
-/*
- * Parallel Pi number calculation using the BBP algorithm
- * Multiple procs and threads can be used
- * The number of iterations is divided by blocks, 
- * so each process calculates a part of pi using threads. 
- * Each process will cyclically divide the iterations 
- * among the threads to calculate its part.  
- * Finally, a collective reduction operation will be performed
- * using a user defined function in OperationsMPI. 
- */
-void bbp_algorithm_gmp(int num_procs, int proc_id, mpf_t pi, int num_iterations, int num_threads){
+void bbp_blocks_and_cyclic_algorithm_gmp(int num_procs, int proc_id, mpf_t pi, int num_iterations, int num_threads){
     int block_size, block_start, block_end, position, packet_size;
     mpf_t local_proc_pi, jump, quotient;
 

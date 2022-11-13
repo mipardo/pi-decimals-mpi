@@ -4,7 +4,7 @@
 #include <omp.h>
 #include "mpi.h"
 #include "../mpi_operations.h"
-#include "chudnovsky.h"
+#include "chudnovsky_blocks_and_cyclic.h"
 
 #define A 13591409
 #define B 545140134
@@ -42,84 +42,14 @@
  ************************************************************************************/
 
 
-/*
- * This method provides an optimal distribution for each thread of any proc
- * based on the Chudnovsky iterations analysis.
- * IMPORTANT: The number of threads used MUST be the same in every process
- * IMPORTANT: (num_procs * num_threads) % 4 == 0 OR (num_procs * num_threads) == 2
- * It returns an array of three integers:
- *   distribution[0] -> block size
- *   distribution[1] -> block start
- *   distribution[2] -> block end 
- */
-int * get_distribution(int num_procs, int proc_id, int num_threads, int thread_id, int num_iterations){
-    int * distribution, i, block_size, block_start, block_end, my_row, my_column, row, column;
-    FILE * ratios_file;
-    float working_ratios[160][41], my_working_ratio;
-
-    //Open the working_ratios file 
-    ratios_file = fopen("resources/working_ratios.txt", "r");
-    if (ratios_file == NULL) { 
-        printf("working_ratios.txt not found \n");
-        MPI_Finalize();
-        exit(-1);
-    } 
-
-    //Load the working_ratios matrix 
-    row = 0;
-    while (fscanf(ratios_file, "%f", &working_ratios[row][0]) == 1){
-        for (column = 1; column < 41; column++){
-            fscanf(ratios_file, "%f", &working_ratios[row][column]);
-        }
-        row++;
-    }
-
-    distribution = malloc(sizeof(int) * 3);
-    if(num_threads * num_procs == 1){
-        distribution[0] = num_iterations;
-        distribution[1] = 0;
-        distribution[2] = num_iterations;
-        return distribution; 
-    }
-
-    my_row = (num_threads * proc_id) + thread_id;
-    my_column = (num_procs * num_threads) / 4;
-    my_working_ratio = working_ratios[my_row][my_column];
-
-    block_size = my_working_ratio * num_iterations / 100;
-    block_start = 0;
-    for(i = 0; i < my_row; i ++){
-        block_start += working_ratios[i][my_column] * num_iterations / 100;
-    }
-    block_end = block_start + block_size;
-
-    if (thread_id == (num_threads - 1) && proc_id == (num_procs - 1)){ 
-        //If Last thread from last process:
-        block_end = num_iterations;
-        block_size = block_end - block_start;
-    }
-
-    distribution[0] = block_size;
-    distribution[1] = block_start;    
-    distribution[2] = block_end;    
-
-    return distribution;
-}
-
-
-
-/*
- * Parallel Pi number calculation using the Chudnovsky algorithm
- * The number of iterations is divided by blocks 
- * so each process calculates a part of pi with multiple threads (or just one thread). 
- * Each process will also divide the iterations in blocks
- * among the threads to calculate its part.  
- * Finally, a collective reduction operation will be performed 
- * using a user defined function in OperationsMPI. 
- */
-void chudnovsky_algorithm_non_uniform_dist_gmp(int num_procs, int proc_id, mpf_t pi, int num_iterations, int num_threads){
-    int packet_size, position; 
+void chudnovsky_blocks_and_blocks_algorithm_gmp(int num_procs, int proc_id, mpf_t pi, int num_iterations, int num_threads){
+    int packet_size, position, block_size, block_start, block_end; 
     mpf_t local_proc_pi, e, c;  
+
+    block_size = (num_iterations + num_procs - 1) / num_procs;
+    block_start = proc_id * block_size;
+    block_end = block_start + block_size;
+    if (block_end > num_iterations) block_end = num_iterations;
 
     mpf_init_set_ui(local_proc_pi, 0);   
     mpf_init_set_ui(e, E);
@@ -133,15 +63,14 @@ void chudnovsky_algorithm_non_uniform_dist_gmp(int num_procs, int proc_id, mpf_t
     #pragma omp parallel 
     {
         int thread_id, i, thread_block_size, thread_block_start, thread_block_end, factor_a;
-        int *distribution;
         mpf_t local_thread_pi, dep_a, dep_a_dividend, dep_a_divisor, dep_b, dep_c, aux;
 
         thread_id = omp_get_thread_num();
-        distribution = get_distribution(num_procs, proc_id, num_threads, thread_id, num_iterations);
-        thread_block_size = distribution[0];
-        thread_block_start = distribution[1];
-        thread_block_end = distribution[2];
-
+        thread_block_size = (block_size + num_threads - 1) / num_threads;
+        thread_block_start = (thread_id * thread_block_size) + block_start;
+        thread_block_end = thread_block_start + thread_block_size;
+        if (thread_block_end > block_end) thread_block_end = block_end;
+       
         mpf_init_set_ui(local_thread_pi, 0);    // private thread pi
         mpf_inits(dep_a, dep_b, dep_a_dividend, dep_a_divisor, aux, NULL);
         init_dep_a_gmp(dep_a, thread_block_start);
@@ -162,9 +91,9 @@ void chudnovsky_algorithm_non_uniform_dist_gmp(int num_procs, int proc_id, mpf_t
                 mpf_mul(dep_a_dividend, dep_a_dividend, dep_a);
 
                 mpf_set_ui(dep_a_divisor, i + 1);
-                mpf_pow_ui(dep_a_divisor, dep_a_divisor ,3);
+                mpf_pow_ui(dep_a_divisor, dep_a_divisor, 3);
                 mpf_div(dep_a, dep_a_dividend, dep_a_divisor);
-                factor_a += 12;
+                factor_a += 12; 
 
                 //Update dep_b:
                 mpf_mul(dep_b, dep_b, c);

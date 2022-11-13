@@ -4,9 +4,9 @@
 #include <time.h>
 #include <stdbool.h>
 #include "mpi.h"
-#include "algorithms/bbp.h"
-#include "algorithms/bellard.h"
-#include "algorithms/chudnovsky.h"
+#include "algorithms/bbp_blocks_and_blocks.h"
+#include "algorithms/bellard_blocks_and_cyclic.h"
+#include "algorithms/chudnovsky_blocks_and_blocks.h"
 #include "check_decimals.h"
 #include "../common/printer.h"
 
@@ -56,21 +56,21 @@ void calculate_pi_mpfr(int num_procs, int proc_id, int algorithm, int precision,
         num_iterations = precision * 0.84;
         check_errors_mpfr(num_procs, precision, num_iterations, num_threads, proc_id, algorithm);
         algorithm_type = "BBP (Processes and threads distributes the iterations in blocks)";
-        bbp_algorithm_mpfr(num_procs, proc_id, pi, num_iterations, num_threads, precision_bits);
+        bbp_blocks_and_blocks_algorithm_mpfr(num_procs, proc_id, pi, num_iterations, num_threads, precision_bits);
         break;
 
     case 1:
         num_iterations = precision / 3;
         check_errors_mpfr(num_procs, precision, num_iterations, num_threads, proc_id, algorithm);
         algorithm_type = "Bellard (Processes distributes the iterations in blocks and threads do it cyclically)";
-        bellard_algorithm_mpfr(num_procs, proc_id, pi, num_iterations, num_threads, precision_bits);
+        bellard_blocks_and_cyclic_algorithm_mpfr(num_procs, proc_id, pi, num_iterations, num_threads, precision_bits);
         break;
 
     case 2:
         num_iterations = (precision + 14 - 1) / 14;  //Division por exceso
         check_errors_mpfr(num_procs, precision, num_iterations, num_threads, proc_id, algorithm);
         algorithm_type = "Chudnovsky (Block distribution by processes and threads and using the simplified mathematical expression)";
-        chudnovsky_algorithm_mpfr(num_procs, proc_id, pi, num_iterations, num_threads, precision_bits);
+        chudnovsky_blocks_and_blocks_algorithm_mpfr(num_procs, proc_id, pi, num_iterations, num_threads, precision_bits);
         break;
 
     default:

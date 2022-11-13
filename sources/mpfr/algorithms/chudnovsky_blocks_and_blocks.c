@@ -80,16 +80,7 @@ void init_dep_a_mpfr(mpfr_t dep_a, int block_start, int precision_bits){
 }
 
 
-/*
- * Parallel Pi number calculation using the Chudnovsky algorithm
- * The number of iterations is divided by blocks 
- * so each process calculates a part of pi with multiple threads (or just one thread). 
- * Each process will also divide the iterations in blocks
- * among the threads to calculate its part.  
- * Finally, a collective reduction operation will be performed 
- * using a user defined function in OperationsMPI. 
- */
-void chudnovsky_algorithm_mpfr(int num_procs, int proc_id, mpfr_t pi, int num_iterations, int num_threads, int precision_bits){
+void chudnovsky_blocks_and_blocks_algorithm_mpfr(int num_procs, int proc_id, mpfr_t pi, int num_iterations, int num_threads, int precision_bits){
     int block_size, block_start, block_end, position, packet_size, d_elements;
     mpfr_t local_proc_pi, e, c;
 

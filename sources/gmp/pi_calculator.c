@@ -4,10 +4,10 @@
 #include <time.h>
 #include <stdbool.h>
 #include "mpi.h"
-#include "algorithms/bbp.h"
-#include "algorithms/bellard.h"
-#include "algorithms/chudnovsky.h"
-#include "algorithms/chudnovsky_blocks_dist.h"
+#include "algorithms/bbp_blocks_and_cyclic.h"
+#include "algorithms/bellard_blocks_and_cyclic.h"
+#include "algorithms/chudnovsky_blocks_and_blocks.h"
+#include "algorithms/chudnovsky_blocks_and_cyclic.h"
 #include "check_decimals.h"
 #include "../common/printer.h"
 
@@ -58,28 +58,28 @@ void calculate_pi_gmp(int num_procs, int proc_id, int algorithm, int precision, 
         num_iterations = precision * 0.84;
         check_errors_gmp(num_procs, precision, num_iterations, num_threads, proc_id, algorithm);
         algorithm_type = "BBP (Processes distributes the iterations in blocks and threads do it cyclically)";
-        bbp_algorithm_gmp(num_procs, proc_id, pi, num_iterations, num_threads);
+        bbp_blocks_and_cyclic_algorithm_gmp(num_procs, proc_id, pi, num_iterations, num_threads);
         break;
 
     case 1:
         num_iterations = precision / 3;
         check_errors_gmp(num_procs, precision, num_iterations, num_threads, proc_id, algorithm);
         algorithm_type = "Bellard (Processes distributes the iterations in blocks and threads do it cyclically)";
-        bellard_algorithm_gmp(num_procs, proc_id, pi, num_iterations, num_threads);
+        bellard_blocks_and_cyclic_algorithm_gmp(num_procs, proc_id, pi, num_iterations, num_threads);
         break;
 
     case 2:
         num_iterations = (precision + 14 - 1) / 14;  //Division por exceso
         check_errors_gmp(num_procs, precision, num_iterations, num_threads, proc_id, algorithm);
         algorithm_type = "Chudnovsky (Processes and threads distributes the iterations in blocks while using the simplified mathematical expression)";
-        chudnovsky_algorithm_blocks_dist_gmp(num_procs, proc_id, pi, num_iterations, num_threads);
+        chudnovsky_blocks_and_blocks_algorithm_gmp(num_procs, proc_id, pi, num_iterations, num_threads);
         break;
     
     case 3:
         num_iterations = (precision + 14 - 1) / 14;  //Division por exceso
         check_errors_gmp(num_procs, precision, num_iterations, num_threads, proc_id, algorithm);
         algorithm_type = "Chudnovsky (Processes distributes the iterations in blocks and threads do it cyclically while using the simplified mathematical expression)";
-        chudnovsky_algorithm_gmp(num_procs, proc_id, pi, num_iterations, num_threads);
+        chudnovsky_blocks_and_cyclic_algorithm_gmp(num_procs, proc_id, pi, num_iterations, num_threads);
         break;
 
 

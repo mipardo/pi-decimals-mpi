@@ -64,16 +64,8 @@ void bbp_iteration_mpfr(mpfr_t pi, int n, mpfr_t dep_m, mpfr_t quot_a, mpfr_t qu
     mpfr_add(pi, pi, aux, MPFR_RNDN);  
 }
 
-/*
- * Parallel Pi number calculation using the BBP algorithm
- * The number of iterations is divided by blocks, 
- * so each process calculates a part of pi using threads. 
- * Each process will also divide the iterations in blocks
- * among the threads to calculate its part.  
- * Finally, a collective reduction operation will be performed
- * using a user defined function in OperationsMPI. 
- */
-void bbp_algorithm_mpfr(int num_procs, int proc_id, mpfr_t pi, int num_iterations, int num_threads, int precision_bits){
+
+void bbp_blocks_and_blocks_algorithm_mpfr(int num_procs, int proc_id, mpfr_t pi, int num_iterations, int num_threads, int precision_bits){
     int block_size, block_start, block_end, position, packet_size, d_elements;
     mpfr_t local_proc_pi, quotient;
 

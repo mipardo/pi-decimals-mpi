@@ -1,4 +1,7 @@
-<img src="https://user-images.githubusercontent.com/60443339/195345025-2f54a691-7918-4a3a-89de-2d488625f4b1.png" alt="drawing"/>
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/60443339/195345025-2f54a691-7918-4a3a-89de-2d488625f4b1.png" alt="drawing"        height="400" /> 
+  <img src="https://user-images.githubusercontent.com/60443339/198055044-a2e7270c-684d-40ac-9836-98d37e77fa33.png#gh-light-mode-only" alt="drawing" height="400" />
+ </p>
 
 This program computes the Pi number using different Spigot algorithms. 
 To perform the operations it is used a floating point precision arithmetic library. PiDecimals allows you to use GMP (The GNU Multiple Precision Arithmetic Library) or MPFR (The GNU Multiple Precision Floating-Point Reliable Library) to compute the Pi number with the algorithms supported.
