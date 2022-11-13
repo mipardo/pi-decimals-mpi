@@ -60,7 +60,10 @@ mpirun -np num_procs ./PiDecimalsMPI.x library algorithm precision num_threads [
 
 En example of use could be:
 ```console
-mpirun -np 2 ./PiDecimals.x MPFR 1 50000 4
+mpirun -np 2 ./PiDecimalsMPI.x MPFR 1 50000 4
 ```
+
 And the output could be:
+
+![image](https://user-images.githubusercontent.com/60443339/201536964-50fb5116-970e-4900-95c2-e97109a4248a.png)
 
