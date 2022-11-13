@@ -1,16 +1,9 @@
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/60443339/201536468-f8b01086-c36b-434b-8a1d-0bf3ec123af3.png#gh-dark-mode-only" alt="drawing"        height="400" /> 
-  <img src="https://user-images.githubusercontent.com/60443339/198055044-a2e7270c-684d-40ac-9836-98d37e77fa33.png#gh-light-mode-only" alt="drawing" height="400" />
+  <img src="https://user-images.githubusercontent.com/60443339/201536649-299983bb-4661-4adc-b59c-5ebd28015b68.png#gh-dark-mode-only" alt="drawing"        height="400" /> 
+  <img src="https://user-images.githubusercontent.com/60443339/195345025-2f54a691-7918-4a3a-89de-2d488625f4b1.png#gh-light-mode-only" alt="drawing" height="400" />
  </p>
  
- <p align="center">
-  <img src="https://user-images.githubusercontent.com/60443339/201536468-f8b01086-c36b-434b-8a1d-0bf3ec123af3.png#gh-dark-mode-only" alt="drawing"        height="400" /> 
-  <img src="https://user-images.githubusercontent.com/60443339/198055044-a2e7270c-684d-40ac-9836-98d37e77fa33.png#gh-light-mode-only" alt="drawing" height="400" />
- </p>
- 
-
-
-This program computes the Pi number using different Spigot algorithms. 
+ This program computes the Pi number using different Spigot algorithms. 
 To perform the operations it is used a floating point precision arithmetic library. PiDecimals allows you to use GMP (The GNU Multiple Precision Arithmetic Library) or MPFR (The GNU Multiple Precision Floating-Point Reliable Library) to compute the Pi number with the algorithms supported.
 
 This version has been developed for clusters. It can be used as a benchmark to compare and test the CPU performance in cluster environments. Processes are managed with MPI and threads are managed with OpenMP.
