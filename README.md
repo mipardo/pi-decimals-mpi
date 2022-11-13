@@ -1,6 +1,6 @@
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/60443339/201536649-299983bb-4661-4adc-b59c-5ebd28015b68.png#gh-dark-mode-only" alt="drawing"        height="400" /> 
-  <img src="https://user-images.githubusercontent.com/60443339/195345025-2f54a691-7918-4a3a-89de-2d488625f4b1.png#gh-light-mode-only" alt="drawing" height="400" />
+  <img src="https://user-images.githubusercontent.com/60443339/201536649-299983bb-4661-4adc-b59c-5ebd28015b68.png#gh-dark-mode-only" alt="drawing" /> 
+  <img src="https://user-images.githubusercontent.com/60443339/195345025-2f54a691-7918-4a3a-89de-2d488625f4b1.png#gh-light-mode-only" alt="drawing" />
  </p>
  
  This program computes the Pi number using different Spigot algorithms. 
