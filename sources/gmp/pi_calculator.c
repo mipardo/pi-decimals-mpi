@@ -7,7 +7,8 @@
 #include "algorithms/bbp_blocks_and_cyclic.h"
 #include "algorithms/bellard_blocks_and_cyclic.h"
 #include "algorithms/chudnovsky_blocks_and_blocks.h"
-#include "algorithms/chudnovsky_meandering_and_blocks.h"
+#include "algorithms/chudnovsky_snake_like_and_blocks.h"
+#include "algorithms/chudnovsky_non_uniform_and_blocks.h"
 #include "check_decimals.h"
 #include "../common/printer.h"
 
@@ -78,8 +79,15 @@ void calculate_pi_gmp(int num_procs, int proc_id, int algorithm, int precision, 
     case 3:
         num_iterations = (precision + 14 - 1) / 14;  //Division por exceso
         check_errors_gmp(num_procs, precision, num_iterations, num_threads, proc_id, algorithm);
-        algorithm_type = "Chudnovsky (Processes distributes the iterations in a meandering way and threads do it in blocks while using the simplified mathematical expression)";
-        chudnovsky_meandering_and_blocks_algorithm_gmp(num_procs, proc_id, pi, num_iterations, num_threads);
+        algorithm_type = "Chudnovsky (Processes distributes the iterations in a snake-like way and threads do it in blocks while using the simplified mathematical expression)";
+        chudnovsky_snake_like_and_blocks_algorithm_gmp(num_procs, proc_id, pi, num_iterations, num_threads);
+        break;
+
+    case 4:
+        num_iterations = (precision + 14 - 1) / 14;  //Division por exceso
+        check_errors_gmp(num_procs, precision, num_iterations, num_threads, proc_id, algorithm);
+        algorithm_type = "Chudnovsky (Processes distributes the iteration in a non uniform block way and threads distributes the iterations in blocks while using the simplified mathematical expression)";
+        chudnovsky_non_uniform_and_blocks_algorithm_gmp(num_procs, proc_id, pi, num_iterations, num_threads);
         break;
 
 
