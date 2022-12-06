@@ -38,21 +38,21 @@ void calculate_pi_mpfr(int num_procs, int proc_id, int algorithm, int precision,
     case 0:
         num_iterations = precision * 0.84;
         check_errors(num_procs, precision, num_iterations, num_threads, proc_id);
-        algorithm_tag = "MPI-MPFR-BBP-BLC-BLC";
+        algorithm_tag = "MPFR-BBP-BLC-BLC";
         bbp_blocks_and_blocks_algorithm_mpfr(num_procs, proc_id, pi, num_iterations, num_threads, precision_bits);
         break;
 
     case 1:
         num_iterations = precision / 3;
         check_errors(num_procs, precision, num_iterations, num_threads, proc_id);
-        algorithm_tag = "MPI-MPFR-BEL-BLC-CYC";
+        algorithm_tag = "MPFR-BEL-BLC-CYC";
         bellard_blocks_and_cyclic_algorithm_mpfr(num_procs, proc_id, pi, num_iterations, num_threads, precision_bits);
         break;
 
     case 2:
         num_iterations = (precision + 14 - 1) / 14;  //Division por exceso
         check_errors(num_procs, precision, num_iterations, num_threads, proc_id);
-        algorithm_tag = "MPI-MPFR-CHD-BLC-BLC-SME";
+        algorithm_tag = "MPFR-CHD-BLC-BLC-SME";
         chudnovsky_blocks_and_blocks_algorithm_mpfr(num_procs, proc_id, pi, num_iterations, num_threads, precision_bits);
         break;
 

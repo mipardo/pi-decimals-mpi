@@ -41,35 +41,35 @@ void calculate_pi_gmp(int num_procs, int proc_id, int algorithm, int precision, 
     case 0:
         num_iterations = precision * 0.84;
         check_errors(num_procs, precision, num_iterations, num_threads, proc_id);
-        algorithm_tag = "MPI-GMP-BBP-BLC-CYC";
+        algorithm_tag = "GMP-BBP-BLC-CYC";
         bbp_blocks_and_cyclic_algorithm_gmp(num_procs, proc_id, pi, num_iterations, num_threads);
         break;
 
     case 1:
         num_iterations = precision / 3;
         check_errors(num_procs, precision, num_iterations, num_threads, proc_id);
-        algorithm_tag = "MPI-GMP-BEL-BLC-CYC";
+        algorithm_tag = "GMP-BEL-BLC-CYC";
         bellard_blocks_and_cyclic_algorithm_gmp(num_procs, proc_id, pi, num_iterations, num_threads);
         break;
 
     case 2:
         num_iterations = (precision + 14 - 1) / 14;  //Division por exceso
         check_errors(num_procs, precision, num_iterations, num_threads, proc_id);
-        algorithm_tag = "MPI-GMP-CHD-BLC-BLC-SME";
+        algorithm_tag = "GMP-CHD-BLC-BLC-SME";
         chudnovsky_blocks_and_blocks_algorithm_gmp(num_procs, proc_id, pi, num_iterations, num_threads);
         break;
     
     case 3:
         num_iterations = (precision + 14 - 1) / 14;  //Division por exceso
         check_errors(num_procs, precision, num_iterations, num_threads, proc_id);
-        algorithm_tag = "MPI-GMP-CHD-SNK-BLC-SME";
+        algorithm_tag = "GMP-CHD-SNK-BLC-SME";
         chudnovsky_snake_like_and_blocks_algorithm_gmp(num_procs, proc_id, pi, num_iterations, num_threads);
         break;
 
     case 4:
         num_iterations = (precision + 14 - 1) / 14;  //Division por exceso
         check_errors(num_procs, precision, num_iterations, num_threads, proc_id);
-        algorithm_tag = "MPI-GMP-CHD-CHT-BLC-SME";
+        algorithm_tag = "GMP-CHD-CHT-BLC-SME";
         chudnovsky_non_uniform_and_blocks_algorithm_gmp(num_procs, proc_id, pi, num_iterations, num_threads);
         break;
 
