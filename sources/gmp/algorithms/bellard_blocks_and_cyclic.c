@@ -112,17 +112,16 @@ void bellard_blocks_and_cyclic_algorithm_gmp(int num_procs, int proc_id, mpf_t p
         mpf_inits(a, b, c, d, e, f, g, aux, NULL);
 
         //First Phase -> Working on a local variable
-        #pragma omp parallel for
-            for(i = block_start + thread_id; i < block_end; i += num_threads){
-                bellard_iteration_gmp(local_thread_pi, i, dep_m, a, b, c, d, e, f, g, aux, dep_a, dep_b);
-                // Update dependencies for next iteration:
-                next_i = i + num_threads;
-                mpf_mul_2exp(dep_m, ONE, 10 * next_i);
-                mpf_div(dep_m, ONE, dep_m);
-                if (next_i % 2 != 0) mpf_neg(dep_m, dep_m);
-                dep_a += jump_dep_a;
-                dep_b += jump_dep_b;
-            }
+        for(i = block_start + thread_id; i < block_end; i += num_threads){
+            bellard_iteration_gmp(local_thread_pi, i, dep_m, a, b, c, d, e, f, g, aux, dep_a, dep_b);
+            // Update dependencies for next iteration:
+            next_i = i + num_threads;
+            mpf_mul_2exp(dep_m, ONE, 10 * next_i);
+            mpf_div(dep_m, ONE, dep_m);
+            if (next_i % 2 != 0) mpf_neg(dep_m, dep_m);
+            dep_a += jump_dep_a;
+            dep_b += jump_dep_b;
+        }
 
         //Second Phase -> Accumulate the result in the global variable
         #pragma omp critical

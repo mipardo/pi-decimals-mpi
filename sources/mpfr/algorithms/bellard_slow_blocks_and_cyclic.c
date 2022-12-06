@@ -78,17 +78,16 @@ void bellard_slow_blocks_and_cyclic_algorithm_mpfr(int num_procs, int proc_id, m
         mpfr_inits2(precision_bits, a, b, c, d, e, f, g, aux, NULL);
 
         //First Phase -> Working on a local variable
-        #pragma omp parallel for 
-            for(i = block_start + thread_id; i < block_end; i+=num_threads){
-                bellard_iteration_mpfr(local_thread_pi, i, dep_m, a, b, c, d, e, f, g, aux, dep_a, dep_b);
-                // Update dependencies for next iteration:
-                next_i = i + num_threads;
-                mpfr_mul_2exp(dep_m, ONE, 10 * next_i, MPFR_RNDN);
-                mpfr_div(dep_m, ONE, dep_m, MPFR_RNDN);
-                if (next_i % 2 != 0) mpfr_neg(dep_m, dep_m, MPFR_RNDN);
-                dep_a += jump_dep_a;
-                dep_b += jump_dep_b;  
-            }
+        for(i = block_start + thread_id; i < block_end; i+=num_threads){
+            bellard_iteration_mpfr(local_thread_pi, i, dep_m, a, b, c, d, e, f, g, aux, dep_a, dep_b);
+            // Update dependencies for next iteration:
+            next_i = i + num_threads;
+            mpfr_mul_2exp(dep_m, ONE, 10 * next_i, MPFR_RNDN);
+            mpfr_div(dep_m, ONE, dep_m, MPFR_RNDN);
+            if (next_i % 2 != 0) mpfr_neg(dep_m, dep_m, MPFR_RNDN);
+            dep_a += jump_dep_a;
+            dep_b += jump_dep_b;  
+        }
 
         //Second Phase -> Accumulate the result in the global variable
         #pragma omp critical

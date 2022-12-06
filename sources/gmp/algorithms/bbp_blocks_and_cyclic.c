@@ -99,12 +99,11 @@ void bbp_blocks_and_cyclic_algorithm_gmp(int num_procs, int proc_id, mpf_t pi, i
         mpf_inits(quot_a, quot_b, quot_c, quot_d, aux, NULL);    
 
         //First Phase -> Working on a local variable        
-        #pragma omp parallel for 
-            for(i = block_start + thread_id; i < block_end; i += num_threads){    
-                bbp_iteration_gmp(local_thread_pi, i, dep_m, quot_a, quot_b, quot_c, quot_d, aux); 
-                // Update depencies: 
-                mpf_mul(dep_m, dep_m, jump);    
-            }
+        for(i = block_start + thread_id; i < block_end; i += num_threads){    
+            bbp_iteration_gmp(local_thread_pi, i, dep_m, quot_a, quot_b, quot_c, quot_d, aux); 
+            // Update depencies: 
+            mpf_mul(dep_m, dep_m, jump);    
+        }
 
         //Second Phase -> Accumulate the result in the global variable
         #pragma omp critical

@@ -160,19 +160,18 @@ void chudnovsky_blocks_and_cyclic_algorithm_gmp(int num_procs, int proc_id, mpf_
         mpf_add_ui(dep_c, dep_c, A);
 
         //First Phase -> Working on a local variable        
-        #pragma omp parallel for 
-            for(i = block_start + thread_id; i < block_end; i += num_threads){
-                chudnovsky_iteration_gmp(local_thread_pi, i, dep_a, dep_b, dep_c, aux);
+        for(i = block_start + thread_id; i < block_end; i += num_threads){
+            chudnovsky_iteration_gmp(local_thread_pi, i, dep_a, dep_b, dep_c, aux);
 
-                //Update dep_a:
-                compute_portion_of_dep_a_gmp(dep_a, i + num_threads, i);
+            //Update dep_a:
+            compute_portion_of_dep_a_gmp(dep_a, i + num_threads, i);
 
-                //Update dep_b:
-                mpf_mul(dep_b, dep_b, jump);
+            //Update dep_b:
+            mpf_mul(dep_b, dep_b, jump);
 
-                //Update dep_c:
-                mpf_add_ui(dep_c, dep_c, B * num_threads);
-            }
+            //Update dep_c:
+            mpf_add_ui(dep_c, dep_c, B * num_threads);
+        }
 
         //Second Phase -> Accumulate the result in the global variable 
         #pragma omp critical

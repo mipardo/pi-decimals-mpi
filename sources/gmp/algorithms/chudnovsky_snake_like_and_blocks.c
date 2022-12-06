@@ -65,26 +65,25 @@ void chudnovsky_snake_like_and_blocks_phase_gmp(mpf_t local_proc_pi, mpf_t c, in
         factor_a = 12 * thread_block_start;
 
         //First Phase -> Working on a local variable        
-        #pragma omp parallel for 
-            for(i = thread_block_start; i < thread_block_end; i++){
-                chudnovsky_iteration_gmp(local_thread_pi, i, dep_a, dep_b, dep_c, aux);
-                //Update dep_a:
-                mpf_set_ui(dep_a_dividend, factor_a + 10);
-                mpf_mul_ui(dep_a_dividend, dep_a_dividend, factor_a + 6);
-                mpf_mul_ui(dep_a_dividend, dep_a_dividend, factor_a + 2);
-                mpf_mul(dep_a_dividend, dep_a_dividend, dep_a);
+        for(i = thread_block_start; i < thread_block_end; i++){
+            chudnovsky_iteration_gmp(local_thread_pi, i, dep_a, dep_b, dep_c, aux);
+            //Update dep_a:
+            mpf_set_ui(dep_a_dividend, factor_a + 10);
+            mpf_mul_ui(dep_a_dividend, dep_a_dividend, factor_a + 6);
+            mpf_mul_ui(dep_a_dividend, dep_a_dividend, factor_a + 2);
+            mpf_mul(dep_a_dividend, dep_a_dividend, dep_a);
 
-                mpf_set_ui(dep_a_divisor, i + 1);
-                mpf_pow_ui(dep_a_divisor, dep_a_divisor, 3);
-                mpf_div(dep_a, dep_a_dividend, dep_a_divisor);
-                factor_a += 12; 
+            mpf_set_ui(dep_a_divisor, i + 1);
+            mpf_pow_ui(dep_a_divisor, dep_a_divisor, 3);
+            mpf_div(dep_a, dep_a_dividend, dep_a_divisor);
+            factor_a += 12; 
 
-                //Update dep_b:
-                mpf_mul(dep_b, dep_b, c);
+            //Update dep_b:
+            mpf_mul(dep_b, dep_b, c);
 
-                //Update dep_c:
-                mpf_add_ui(dep_c, dep_c, B);
-            }
+            //Update dep_c:
+            mpf_add_ui(dep_c, dep_c, B);
+        }
 
         //Second Phase -> Accumulate the result in the global variable 
         #pragma omp critical

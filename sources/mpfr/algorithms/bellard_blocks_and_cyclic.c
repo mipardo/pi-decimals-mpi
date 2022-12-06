@@ -119,24 +119,22 @@ void bellard_blocks_and_cyclic_algorithm_mpfr(int num_procs, int proc_id, mpfr_t
 
         //First Phase -> Working on a local variable
         if(num_threads % 2 != 0){
-            #pragma omp parallel for 
-                for(i = block_start + thread_id; i < block_end; i+=num_threads){
-                    bellard_iteration_mpfr(local_thread_pi, i, dep_m, a, b, c, d, e, f, g, aux, dep_a, dep_b);
-                    // Update dependencies for next iteration:
-                    mpfr_mul(dep_m, dep_m, jump, MPFR_RNDN); 
-                    mpfr_neg(dep_m, dep_m, MPFR_RNDN); 
-                    dep_a += jump_dep_a;
-                    dep_b += jump_dep_b;  
-                }
+            for(i = block_start + thread_id; i < block_end; i+=num_threads){
+                bellard_iteration_mpfr(local_thread_pi, i, dep_m, a, b, c, d, e, f, g, aux, dep_a, dep_b);
+                // Update dependencies for next iteration:
+                mpfr_mul(dep_m, dep_m, jump, MPFR_RNDN); 
+                mpfr_neg(dep_m, dep_m, MPFR_RNDN); 
+                dep_a += jump_dep_a;
+                dep_b += jump_dep_b;  
+            }
         } else {
-            #pragma omp parallel for
-                for(i = block_start + thread_id; i < block_end; i+=num_threads){
-                    bellard_iteration_mpfr(local_thread_pi, i, dep_m, a, b, c, d, e, f, g, aux, dep_a, dep_b);
-                    // Update dependencies for next iteration:
-                    mpfr_mul(dep_m, dep_m, jump, MPFR_RNDN);    
-                    dep_a += jump_dep_a;
-                    dep_b += jump_dep_b;  
-                }
+            for(i = block_start + thread_id; i < block_end; i+=num_threads){
+                bellard_iteration_mpfr(local_thread_pi, i, dep_m, a, b, c, d, e, f, g, aux, dep_a, dep_b);
+                // Update dependencies for next iteration:
+                mpfr_mul(dep_m, dep_m, jump, MPFR_RNDN);    
+                dep_a += jump_dep_a;
+                dep_b += jump_dep_b;  
+            }
         }
 
         //Second Phase -> Accumulate the result in the global variable

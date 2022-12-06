@@ -101,12 +101,11 @@ void bbp_blocks_and_blocks_algorithm_mpfr(int num_procs, int proc_id, mpfr_t pi,
         
 
         //First Phase -> Working on a local variable        
-        #pragma omp parallel for 
-            for(i = thread_block_start; i < thread_block_end; i++){
-                bbp_iteration_mpfr(local_thread_pi, i, dep_m, quot_a, quot_b, quot_c, quot_d, aux);
-                // Update dependencies:  
-                mpfr_mul(dep_m, dep_m, quotient, MPFR_RNDN);
-            }
+        for(i = thread_block_start; i < thread_block_end; i++){
+            bbp_iteration_mpfr(local_thread_pi, i, dep_m, quot_a, quot_b, quot_c, quot_d, aux);
+            // Update dependencies:  
+            mpfr_mul(dep_m, dep_m, quotient, MPFR_RNDN);
+        }
 
         //Second Phase -> Accumulate the result in the global variable
         #pragma omp critical
