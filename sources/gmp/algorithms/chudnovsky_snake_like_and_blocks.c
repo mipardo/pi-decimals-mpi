@@ -43,9 +43,6 @@
 
 
 void chudnovsky_snake_like_and_blocks_phase_gmp(mpf_t local_proc_pi, mpf_t c, int num_threads, int block_size, int block_start, int block_end){
-    #pragma omp parallel 
-    {
-    
         int thread_id, i, thread_block_size, thread_block_start, thread_block_end, factor_a;
         mpf_t local_thread_pi, dep_a, dep_a_dividend, dep_a_divisor, dep_b, dep_c, aux;
 
@@ -91,7 +88,6 @@ void chudnovsky_snake_like_and_blocks_phase_gmp(mpf_t local_proc_pi, mpf_t c, in
 
         //Clear thread memory
         mpf_clears(local_thread_pi, dep_a, dep_a_dividend, dep_a_divisor, dep_b, dep_c, aux, NULL);   
-    }
 }
 
 
@@ -116,8 +112,11 @@ void chudnovsky_snake_like_and_blocks_algorithm_gmp(int num_procs, int proc_id, 
     omp_set_num_threads(num_threads);
 
     // Compute the first block of iterations and then the second
-    chudnovsky_snake_like_and_blocks_phase_gmp(local_proc_pi, c, num_threads, block_size, first_block_start, first_block_end);
-    chudnovsky_snake_like_and_blocks_phase_gmp(local_proc_pi, c, num_threads, block_size, second_block_start, second_block_end);
+    # pragma omp parallel
+    {
+        chudnovsky_snake_like_and_blocks_phase_gmp(local_proc_pi, c, num_threads, block_size, first_block_start, first_block_end);
+        chudnovsky_snake_like_and_blocks_phase_gmp(local_proc_pi, c, num_threads, block_size, second_block_start, second_block_end);
+    } 
     
     //Create user defined operation
     MPI_Op add_op;
