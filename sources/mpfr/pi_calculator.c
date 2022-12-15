@@ -52,7 +52,7 @@ void calculate_pi_mpfr(int num_procs, int proc_id, int algorithm, int precision,
     case 2:
         num_iterations = (precision + 14 - 1) / 14;  //Division por exceso
         check_errors(num_procs, precision, num_iterations, num_threads, proc_id);
-        algorithm_tag = "MPFR-CHD-BLC-BLC-SME";
+        algorithm_tag = "MPFR-CHD-SME-BLC-BLC";
         chudnovsky_blocks_and_blocks_algorithm_mpfr(num_procs, proc_id, pi, num_iterations, num_threads, precision_bits);
         break;
 
