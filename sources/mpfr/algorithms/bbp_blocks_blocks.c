@@ -40,7 +40,7 @@
  /*
  * An iteration of Bailey Borwein Plouffe formula
  */
-void bbp_iteration_mpfr(mpfr_t pi, int n, mpfr_t dep_m, mpfr_t quot_a, mpfr_t quot_b, mpfr_t quot_c, mpfr_t quot_d, mpfr_t aux){
+void mpfr_bbp_iteration(mpfr_t pi, int n, mpfr_t dep_m, mpfr_t quot_a, mpfr_t quot_b, mpfr_t quot_c, mpfr_t quot_d, mpfr_t aux){
     mpfr_set_ui(quot_a, 4, MPFR_RNDN);              // quot_a = ( 4 / (8n + 1))
     mpfr_set_ui(quot_b, 2, MPFR_RNDN);              // quot_b = (-2 / (8n + 4))
     mpfr_set_ui(quot_c, 1, MPFR_RNDN);              // quot_c = (-1 / (8n + 5))
@@ -65,7 +65,7 @@ void bbp_iteration_mpfr(mpfr_t pi, int n, mpfr_t dep_m, mpfr_t quot_a, mpfr_t qu
 }
 
 
-void bbp_blocks_and_blocks_algorithm_mpfr(int num_procs, int proc_id, mpfr_t pi, int num_iterations, int num_threads, int precision_bits){
+void mpfr_bbp_blocks_blocks_algorithm(int num_procs, int proc_id, mpfr_t pi, int num_iterations, int num_threads, int precision_bits){
     int block_size, block_start, block_end, position, packet_size, d_elements;
     mpfr_t local_proc_pi, quotient;
 
@@ -102,7 +102,7 @@ void bbp_blocks_and_blocks_algorithm_mpfr(int num_procs, int proc_id, mpfr_t pi,
 
         //First Phase -> Working on a local variable        
         for(i = thread_block_start; i < thread_block_end; i++){
-            bbp_iteration_mpfr(local_thread_pi, i, dep_m, quot_a, quot_b, quot_c, quot_d, aux);
+            mpfr_bbp_iteration(local_thread_pi, i, dep_m, quot_a, quot_b, quot_c, quot_d, aux);
             // Update dependencies:  
             mpfr_mul(dep_m, dep_m, quotient, MPFR_RNDN);
         }
@@ -118,7 +118,7 @@ void bbp_blocks_and_blocks_algorithm_mpfr(int num_procs, int proc_id, mpfr_t pi,
 
     //Create user defined operation
     MPI_Op add_op;
-    MPI_Op_create((MPI_User_function *)add_mpfr, 0, &add_op);
+    MPI_Op_create((MPI_User_function *)mpfr_mpi_add, 0, &add_op);
 
     //Set buffers for cumunications and position for pack and unpack information
     d_elements = (int) ceil((float) local_proc_pi -> _mpfr_prec / (float) GMP_NUMB_BITS);
@@ -127,14 +127,14 @@ void bbp_blocks_and_blocks_algorithm_mpfr(int num_procs, int proc_id, mpfr_t pi,
     char sendbuffer[packet_size];
 
     //Pack local_proc_pi in sendbuffuer
-    position = pack_mpfr(sendbuffer, local_proc_pi);
+    position = mpfr_mpi_pack(sendbuffer, local_proc_pi);
 
     //Reduce piLocal
     MPI_Reduce(sendbuffer, recbuffer, position, MPI_PACKED, add_op, 0, MPI_COMM_WORLD);
 
     //Unpack recbuffer in global Pi and do the last operation
     if (proc_id == 0){
-        unpack_mpfr(recbuffer, pi);
+        mpfr_mpi_unpack(recbuffer, pi);
     }
 
     //Clear memory

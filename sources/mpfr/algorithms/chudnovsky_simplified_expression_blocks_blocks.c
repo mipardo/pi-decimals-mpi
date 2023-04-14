@@ -46,7 +46,7 @@
 /*
  * An iteration of Chudnovsky formula
  */
-void chudnovsky_iteration_mpfr(mpfr_t pi, int n, mpfr_t dep_a, mpfr_t dep_b, mpfr_t dep_c, mpfr_t aux){
+void mpfr_chudnovsky_iteration(mpfr_t pi, int n, mpfr_t dep_a, mpfr_t dep_b, mpfr_t dep_c, mpfr_t aux){
     mpfr_mul(aux, dep_a, dep_c, MPFR_RNDN);
     mpfr_div(aux, aux, dep_b, MPFR_RNDN);
     
@@ -57,7 +57,7 @@ void chudnovsky_iteration_mpfr(mpfr_t pi, int n, mpfr_t dep_a, mpfr_t dep_b, mpf
  * This method is used by Chudnovsky_algorithm_MPI threads
  * for computing the first value of dep_a
  */
-void init_dep_a_mpfr(mpfr_t dep_a, int block_start, int precision_bits){
+void mpfr_init_dep_a(mpfr_t dep_a, int block_start, int precision_bits){
     mpz_t factorial_n, dividend, divisor;
     mpfr_t float_dividend, float_divisor;
     mpz_inits(factorial_n, dividend, divisor, NULL);
@@ -80,7 +80,7 @@ void init_dep_a_mpfr(mpfr_t dep_a, int block_start, int precision_bits){
 }
 
 
-void chudnovsky_blocks_and_blocks_algorithm_mpfr(int num_procs, int proc_id, mpfr_t pi, int num_iterations, int num_threads, int precision_bits){
+void mpfr_chudnovsky_simplified_expression_blocks_blocks_algorithm(int num_procs, int proc_id, mpfr_t pi, int num_iterations, int num_threads, int precision_bits){
     int block_size, block_start, block_end, position, packet_size, d_elements;
     mpfr_t local_proc_pi, e, c;
 
@@ -113,7 +113,7 @@ void chudnovsky_blocks_and_blocks_algorithm_mpfr(int num_procs, int proc_id, mpf
         mpfr_init2(local_thread_pi, precision_bits);    // private thread pi
         mpfr_set_ui(local_thread_pi, 0, MPFR_RNDN);
         mpfr_inits2(precision_bits, dep_a, dep_b, dep_c, dep_a_dividend, dep_a_divisor, aux, NULL);
-        init_dep_a_mpfr(dep_a, thread_block_start, precision_bits);
+        mpfr_init_dep_a(dep_a, thread_block_start, precision_bits);
         mpfr_pow_ui(dep_b, c, thread_block_start, MPFR_RNDN);
         mpfr_set_ui(dep_c, B, MPFR_RNDN);
         mpfr_mul_ui(dep_c, dep_c, thread_block_start, MPFR_RNDN);
@@ -123,7 +123,7 @@ void chudnovsky_blocks_and_blocks_algorithm_mpfr(int num_procs, int proc_id, mpf
 
         //First Phase -> Working on a local variable        
         for(i = thread_block_start; i < thread_block_end; i++){
-            chudnovsky_iteration_mpfr(local_thread_pi, i, dep_a, dep_b, dep_c, aux);
+            mpfr_chudnovsky_iteration(local_thread_pi, i, dep_a, dep_b, dep_c, aux);
             //Update dep_a:
             mpfr_set_ui(dep_a_dividend, factor_a + 10, MPFR_RNDN);
             mpfr_mul_ui(dep_a_dividend, dep_a_dividend, factor_a + 6, MPFR_RNDN);
@@ -153,7 +153,7 @@ void chudnovsky_blocks_and_blocks_algorithm_mpfr(int num_procs, int proc_id, mpf
 
      //Create user defined operation
     MPI_Op add_op;
-    MPI_Op_create((MPI_User_function *)add_mpfr, 0, &add_op);
+    MPI_Op_create((MPI_User_function *)mpfr_mpi_add, 0, &add_op);
 
     //Set buffers for cumunications and position for pack and unpack information
     d_elements = (int) ceil((float) local_proc_pi -> _mpfr_prec / (float) GMP_NUMB_BITS);
@@ -162,14 +162,14 @@ void chudnovsky_blocks_and_blocks_algorithm_mpfr(int num_procs, int proc_id, mpf
     char sendbuffer[packet_size];
 
     //Pack local_proc_pi in sendbuffuer
-    position = pack_mpfr(sendbuffer, local_proc_pi);
+    position = mpfr_mpi_pack(sendbuffer, local_proc_pi);
 
     //Reduce piLocal
     MPI_Reduce(sendbuffer, recbuffer, position, MPI_PACKED, add_op, 0, MPI_COMM_WORLD);
 
     //Unpack recbuffer in global Pi and do the last operation
     if (proc_id == 0){
-        unpack_mpfr(recbuffer, pi);
+        mpfr_mpi_unpack(recbuffer, pi);
         mpfr_sqrt(e, e, MPFR_RNDN);
         mpfr_mul_ui(e, e, D, MPFR_RNDN);
         mpfr_div(pi, e, pi, MPFR_RNDN); 

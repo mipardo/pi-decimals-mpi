@@ -45,7 +45,7 @@
 /*
  * An iteration of Bailey Borwein Plouffe formula
  */
-void bbp_iteration_gmp(mpf_t pi, int n, mpf_t dep_m, mpf_t quot_a, mpf_t quot_b, mpf_t quot_c, mpf_t quot_d, mpf_t aux){
+void gmp_bbp_iteration(mpf_t pi, int n, mpf_t dep_m, mpf_t quot_a, mpf_t quot_b, mpf_t quot_c, mpf_t quot_d, mpf_t aux){
     mpf_set_ui(quot_a, 4);              // quot_a = ( 4 / (8n + 1))
     mpf_set_ui(quot_b, 2);              // quot_b = (-2 / (8n + 4))
     mpf_set_ui(quot_c, 1);              // quot_c = (-1 / (8n + 5))
@@ -70,7 +70,7 @@ void bbp_iteration_gmp(mpf_t pi, int n, mpf_t dep_m, mpf_t quot_a, mpf_t quot_b,
 }
 
 
-void bbp_blocks_and_cyclic_algorithm_gmp(int num_procs, int proc_id, mpf_t pi, int num_iterations, int num_threads){
+void gmp_bbp_blocks_cyclic_algorithm(int num_procs, int proc_id, mpf_t pi, int num_iterations, int num_threads){
     int block_size, block_start, block_end, position, packet_size;
     mpf_t local_proc_pi, jump, quotient;
 
@@ -100,7 +100,7 @@ void bbp_blocks_and_cyclic_algorithm_gmp(int num_procs, int proc_id, mpf_t pi, i
 
         //First Phase -> Working on a local variable        
         for(i = block_start + thread_id; i < block_end; i += num_threads){    
-            bbp_iteration_gmp(local_thread_pi, i, dep_m, quot_a, quot_b, quot_c, quot_d, aux); 
+            gmp_bbp_iteration(local_thread_pi, i, dep_m, quot_a, quot_b, quot_c, quot_d, aux); 
             // Update depencies: 
             mpf_mul(dep_m, dep_m, jump);    
         }
@@ -116,7 +116,7 @@ void bbp_blocks_and_cyclic_algorithm_gmp(int num_procs, int proc_id, mpf_t pi, i
 
     //Create user defined operation
     MPI_Op add_op;
-    MPI_Op_create((MPI_User_function *)add_gmp, 0, &add_op);
+    MPI_Op_create((MPI_User_function *)gmp_add, 0, &add_op);
 
     //Set buffers for cumunications, and position for pack and unpack information 
     packet_size = 8 + sizeof(mp_exp_t) + ((local_proc_pi -> _mp_prec + 1) * sizeof(mp_limb_t));
@@ -125,14 +125,14 @@ void bbp_blocks_and_cyclic_algorithm_gmp(int num_procs, int proc_id, mpf_t pi, i
 
 
     //Pack local_proc_pi in sendbuffuer
-    position = pack_gmp(sendbuffer, local_proc_pi);
+    position = gmp_pack(sendbuffer, local_proc_pi);
 
     //Reduce piLocal
     MPI_Reduce(sendbuffer, recbuffer, position, MPI_PACKED, add_op, 0, MPI_COMM_WORLD);
 
     //Unpack recbuffer in global Pi
     if (proc_id == 0){
-        unpack_gmp(recbuffer, pi);
+        gmp_unpack(recbuffer, pi);
     }
 
 

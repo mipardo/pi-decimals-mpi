@@ -4,7 +4,7 @@
 #include <omp.h>
 #include "mpi.h"
 #include "../mpi_operations.h"
-#include "chudnovsky_blocks_and_cyclic.h"
+#include "chudnovsky_simplified_expression_blocks_cyclic.h"
 
 #define A 13591409
 #define B 545140134
@@ -108,7 +108,7 @@ int * get_distribution(int num_procs, int proc_id, int num_threads, int thread_i
 
 
 
-void chudnovsky_non_uniform_and_blocks_algorithm_gmp(int num_procs, int proc_id, mpf_t pi, int num_iterations, int num_threads){
+void gmp_chudnovsky_simplified_expression_cheater_blocks_algorithm(int num_procs, int proc_id, mpf_t pi, int num_iterations, int num_threads){
     int packet_size, position; 
     mpf_t local_proc_pi, e, c;  
 
@@ -135,7 +135,7 @@ void chudnovsky_non_uniform_and_blocks_algorithm_gmp(int num_procs, int proc_id,
 
         mpf_init_set_ui(local_thread_pi, 0);    // private thread pi
         mpf_inits(dep_a, dep_b, dep_a_dividend, dep_a_divisor, aux, NULL);
-        init_dep_a_gmp(dep_a, thread_block_start);
+        gmp_init_dep_a(dep_a, thread_block_start);
         mpf_pow_ui(dep_b, c, thread_block_start);
         mpf_init_set_ui(dep_c, B);
         mpf_mul_ui(dep_c, dep_c, thread_block_start);
@@ -144,7 +144,7 @@ void chudnovsky_non_uniform_and_blocks_algorithm_gmp(int num_procs, int proc_id,
 
         //First Phase -> Working on a local variable        
         for(i = thread_block_start; i < thread_block_end; i++){
-            chudnovsky_iteration_gmp(local_thread_pi, i, dep_a, dep_b, dep_c, aux);
+            gmp_chudnovsky_iteration(local_thread_pi, i, dep_a, dep_b, dep_c, aux);
             //Update dep_a:
             mpf_set_ui(dep_a_dividend, factor_a + 10);
             mpf_mul_ui(dep_a_dividend, dep_a_dividend, factor_a + 6);
@@ -173,7 +173,7 @@ void chudnovsky_non_uniform_and_blocks_algorithm_gmp(int num_procs, int proc_id,
     
     //Create user defined operation
     MPI_Op add_op;
-    MPI_Op_create((MPI_User_function *)add_gmp, 0, &add_op);
+    MPI_Op_create((MPI_User_function *)gmp_add, 0, &add_op);
 
     //Set buffers for cumunications and position for pack and unpack information 
     packet_size = 8 + sizeof(mp_exp_t) + ((local_proc_pi -> _mp_prec + 1) * sizeof(mp_limb_t));
@@ -181,14 +181,14 @@ void chudnovsky_non_uniform_and_blocks_algorithm_gmp(int num_procs, int proc_id,
     char sendbuffer[packet_size];
 
     //Pack local_proc_pi in sendbuffuer
-    position = pack_gmp(sendbuffer, local_proc_pi);
+    position = gmp_pack(sendbuffer, local_proc_pi);
 
     //Reduce local_proc_pi
     MPI_Reduce(sendbuffer, recbuffer, position, MPI_PACKED, add_op, 0, MPI_COMM_WORLD);
 
     //Unpack recbuffer in global Pi and do the last operations to get Pi
     if (proc_id == 0){
-        unpack_gmp(recbuffer, pi);
+        gmp_unpack(recbuffer, pi);
         mpf_sqrt(e, e);
         mpf_mul_ui(e, e, D);
         mpf_div(pi, e, pi); 

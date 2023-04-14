@@ -1,10 +1,10 @@
-#ifndef MPI_OPERATIONS_GMP
-#define MPI_OPERATIONS_GMP
+#ifndef GMP_MPI_OPERATIONS
+#define GMP_MPI_OPERATIONS
 
-void add_gmp(void *, void *, int *, MPI_Datatype *);
-void mul_gmp(void *, void *, int *, MPI_Datatype *);
-int pack_gmp(void *, mpf_t);
-void unpack_gmp(void *, mpf_t);
+void gmp_add(void *, void *, int *, MPI_Datatype *);
+void gmp_mul(void *, void *, int *, MPI_Datatype *);
+int  gmp_pack(void *, mpf_t);
+void gmp_unpack(void *, mpf_t);
 
 #endif
 

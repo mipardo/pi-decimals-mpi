@@ -7,7 +7,7 @@
  * Pack mpf_t type
  * IMPORTANT: mpf_t data should have been previously initialized
  */
-int pack_gmp(void * buffer, mpf_t data){
+int gmp_pack(void * buffer, mpf_t data){
     int position, packet_size;
     packet_size = 8 + sizeof(mp_exp_t) + ((data -> _mp_prec + 1) * sizeof(mp_limb_t));
     position = 0;
@@ -22,7 +22,7 @@ int pack_gmp(void * buffer, mpf_t data){
  * Unpack mpf_t type
  * IMPORTANT: mpf_t data should have been previously initialized
  */
-void unpack_gmp(void * buffer, mpf_t data){
+void gmp_unpack(void * buffer, mpf_t data){
     int position, packet_size;
     packet_size = 8 + sizeof(mp_exp_t) + ((data -> _mp_prec + 1) * sizeof(mp_limb_t));
     position = 0;
@@ -36,13 +36,13 @@ void unpack_gmp(void * buffer, mpf_t data){
  * Operation defined for MPI
  * Adds mpf_t types
  */
-void add_gmp(void * invec, void * inoutvec, int *len, MPI_Datatype *dtype){
+void gmp_add(void * invec, void * inoutvec, int *len, MPI_Datatype *dtype){
     mpf_t a, b;
     mpf_inits(a, b, NULL);
-    unpack_gmp(invec, a);
-    unpack_gmp(inoutvec, b);
+    gmp_unpack(invec, a);
+    gmp_unpack(inoutvec, b);
     mpf_add(b, b, a);
-    pack_gmp(inoutvec, b);
+    gmp_pack(inoutvec, b);
     mpf_clears(a, b, NULL);
 }
 
@@ -50,13 +50,13 @@ void add_gmp(void * invec, void * inoutvec, int *len, MPI_Datatype *dtype){
  * Operation defined for MPI
  * Multiply mpf_t types
  */
-void mul_gmp(void * invec, void * inoutvec, int *len, MPI_Datatype *dtype){
+void gmp_mul(void * invec, void * inoutvec, int *len, MPI_Datatype *dtype){
     mpf_t a, b;
     mpf_inits(a, b, NULL);    
-    unpack_gmp(invec, a);
-    unpack_gmp(inoutvec, b);
+    gmp_unpack(invec, a);
+    gmp_unpack(inoutvec, b);
     mpf_mul(b, b, a);
-    pack_gmp(inoutvec, b);
+    gmp_pack(inoutvec, b);
     mpf_clears(a, b, NULL);
 }
 

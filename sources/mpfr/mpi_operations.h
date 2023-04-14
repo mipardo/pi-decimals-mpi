@@ -1,9 +1,9 @@
-#ifndef MPI_OPERATIONS_MPFR
-#define MPI_OPERATIONS_MPFR
+#ifndef MPFR_MPI_OPERATIONS
+#define MPFR_MPI_OPERATIONS
 
-void add_mpfr(void *, void *, int *, MPI_Datatype *);
-void mul_mpfr(void *, void *, int *, MPI_Datatype *);
-int pack_mpfr(void *, mpfr_t);
-void unpack_mpfr(void *, mpfr_t);
+void mpfr_mpi_add(void *, void *, int *, MPI_Datatype *);
+void mpfr_mpi_mul(void *, void *, int *, MPI_Datatype *);
+int  mpfr_mpi_pack(void *, mpfr_t);
+void mpfr_mpi_unpack(void *, mpfr_t);
 
 #endif

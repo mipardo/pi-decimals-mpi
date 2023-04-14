@@ -46,10 +46,10 @@ int main(int argc, char **argv){
 
 
     if (strcmp(library, "GMP") == 0) {
-        calculate_pi_gmp(num_procs, proc_id, algorithm, precision, num_threads, print_in_csv_format);
+        gmp_calculate_pi(num_procs, proc_id, algorithm, precision, num_threads, print_in_csv_format);
     } 
     else if (strcmp(library, "MPFR") == 0) {
-        calculate_pi_mpfr(num_procs, proc_id, algorithm, precision, num_threads, print_in_csv_format);
+        mpfr_calculate_pi(num_procs, proc_id, algorithm, precision, num_threads, print_in_csv_format);
     } 
     else 
     {

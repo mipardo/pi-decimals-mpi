@@ -8,7 +8,7 @@
  * Pack mpf_t type
  * IMPORTANT: mpf_t data should have been previously initialized
  */
-int pack_mpfr(void * buffer, mpfr_t data){
+int mpfr_mpi_pack(void * buffer, mpfr_t data){
     int position, packet_size, d_elements;
     d_elements = (int) ceil((float) data -> _mpfr_prec / (float) GMP_NUMB_BITS);
     packet_size = 8 + sizeof(mpfr_exp_t) + (d_elements * sizeof(mp_limb_t));
@@ -24,7 +24,7 @@ int pack_mpfr(void * buffer, mpfr_t data){
  * Unpack mpf_t type
  * IMPORTANT: mpf_t data should have been previously initialized
  */
-void unpack_mpfr(void * buffer, mpfr_t data){
+void mpfr_mpi_unpack(void * buffer, mpfr_t data){
     int position, packet_size, d_elements;
     d_elements = (int) ceil((float) data -> _mpfr_prec / (float) GMP_NUMB_BITS);
     packet_size = 8 + sizeof(mpfr_exp_t) + (d_elements * sizeof(mp_limb_t));
@@ -40,13 +40,13 @@ void unpack_mpfr(void * buffer, mpfr_t data){
  * Operation defined for MPI
  * Adds mpf_t types
  */
-void add_mpfr(void * invec, void * inoutvec, int *len, MPI_Datatype *dtype){
+void mpfr_mpi_add(void * invec, void * inoutvec, int *len, MPI_Datatype *dtype){
     mpfr_t a, b;
     mpfr_inits(a, b, NULL);
-    unpack_mpfr(invec, a);
-    unpack_mpfr(inoutvec, b);
+    mpfr_mpi_unpack(invec, a);
+    mpfr_mpi_unpack(inoutvec, b);
     mpfr_add(b, b, a, MPFR_RNDN);
-    pack_mpfr(inoutvec, b);
+    mpfr_mpi_pack(inoutvec, b);
     mpfr_clears(a, b, NULL);
 }
 
@@ -54,13 +54,13 @@ void add_mpfr(void * invec, void * inoutvec, int *len, MPI_Datatype *dtype){
  * Operation defined for MPI
  * Multiply mpf_t types
  */
-void mul_mpfr(void * invec, void * inoutvec, int *len, MPI_Datatype *dtype){
+void mpfr_mpi_mul(void * invec, void * inoutvec, int *len, MPI_Datatype *dtype){
     mpfr_t a, b;
     mpfr_inits(a, b, NULL);    
-    unpack_mpfr(invec, a);
-    unpack_mpfr(inoutvec, b);
+    mpfr_mpi_unpack(invec, a);
+    mpfr_mpi_unpack(inoutvec, b);
     mpfr_mul(b, b, a, MPFR_RNDN);
-    pack_mpfr(inoutvec, b);
+    mpfr_mpi_pack(inoutvec, b);
     mpfr_clears(a, b, NULL);
 }
 

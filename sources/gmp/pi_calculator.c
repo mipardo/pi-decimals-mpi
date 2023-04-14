@@ -4,11 +4,12 @@
 #include <time.h>
 #include <stdbool.h>
 #include "mpi.h"
-#include "algorithms/bbp_blocks_and_cyclic.h"
-#include "algorithms/bellard_blocks_and_cyclic.h"
-#include "algorithms/chudnovsky_blocks_and_blocks.h"
-#include "algorithms/chudnovsky_snake_like_and_blocks.h"
-#include "algorithms/chudnovsky_non_uniform_and_blocks.h"
+#include "algorithms/bbp_blocks_cyclic.h"
+#include "algorithms/bellard_bit_shift_power_blocks_cyclic.h"
+#include "algorithms/chudnovsky_simplified_expression_blocks_cyclic.h"
+#include "algorithms/chudnovsky_simplified_expression_blocks_blocks.h"
+#include "algorithms/chudnovsky_simplified_expression_snake_like_blocks.h"
+#include "algorithms/chudnovsky_simplified_expression_cheater_blocks.h"
 #include "check_decimals.h"
 #include "../common/printer.h"
 
@@ -16,7 +17,7 @@
 double gettimeofday();
 
 
-void calculate_pi_gmp(int num_procs, int proc_id, int algorithm, int precision, int num_threads, bool print_in_csv_format){
+void gmp_calculate_pi(int num_procs, int proc_id, int algorithm, int precision, int num_threads, bool print_in_csv_format){
     double execution_time;
     struct timeval t1, t2;
     int num_iterations, decimals_computed; 
@@ -42,35 +43,42 @@ void calculate_pi_gmp(int num_procs, int proc_id, int algorithm, int precision, 
         num_iterations = precision * 0.84;
         check_errors(num_procs, precision, num_iterations, num_threads, proc_id);
         algorithm_tag = "GMP-BBP-BLC-CYC";
-        bbp_blocks_and_cyclic_algorithm_gmp(num_procs, proc_id, pi, num_iterations, num_threads);
+        gmp_bbp_blocks_cyclic_algorithm(num_procs, proc_id, pi, num_iterations, num_threads);
         break;
 
     case 1:
         num_iterations = precision / 3;
         check_errors(num_procs, precision, num_iterations, num_threads, proc_id);
-        algorithm_tag = "GMP-BEL-BLC-CYC";
-        bellard_blocks_and_cyclic_algorithm_gmp(num_procs, proc_id, pi, num_iterations, num_threads);
+        algorithm_tag = "GMP-BEL-BSP-BLC-CYC";
+        gmp_bellard_bit_shift_power_blocks_cyclic_algorithm(num_procs, proc_id, pi, num_iterations, num_threads);
         break;
 
     case 2:
         num_iterations = (precision + 14 - 1) / 14;  //Division por exceso
         check_errors(num_procs, precision, num_iterations, num_threads, proc_id);
-        algorithm_tag = "GMP-CHD-SME-BLC-BLC";
-        chudnovsky_blocks_and_blocks_algorithm_gmp(num_procs, proc_id, pi, num_iterations, num_threads);
+        algorithm_tag = "GMP-CHD-SME-BLC-CYC";
+        gmp_chudnovsky_simplified_expression_blocks_cyclic_algorithm(num_procs, proc_id, pi, num_iterations, num_threads);
         break;
     
     case 3:
         num_iterations = (precision + 14 - 1) / 14;  //Division por exceso
         check_errors(num_procs, precision, num_iterations, num_threads, proc_id);
-        algorithm_tag = "GMP-CHD-SME-SNK-BLC";
-        chudnovsky_snake_like_and_blocks_algorithm_gmp(num_procs, proc_id, pi, num_iterations, num_threads);
+        algorithm_tag = "GMP-CHD-SME-BLC-BLC";
+        gmp_chudnovsky_simplified_expression_blocks_blocks_algorithm(num_procs, proc_id, pi, num_iterations, num_threads);
         break;
 
     case 4:
         num_iterations = (precision + 14 - 1) / 14;  //Division por exceso
         check_errors(num_procs, precision, num_iterations, num_threads, proc_id);
+        algorithm_tag = "GMP-CHD-SME-SNK-BLC";
+        gmp_chudnovsky_simplified_expression_snake_like_blocks_algorithm(num_procs, proc_id, pi, num_iterations, num_threads);
+        break;
+
+    case 5:
+        num_iterations = (precision + 14 - 1) / 14;  //Division por exceso
+        check_errors(num_procs, precision, num_iterations, num_threads, proc_id);
         algorithm_tag = "GMP-CHD-SME-CHT-BLC";
-        chudnovsky_non_uniform_and_blocks_algorithm_gmp(num_procs, proc_id, pi, num_iterations, num_threads);
+        gmp_chudnovsky_simplified_expression_cheater_blocks_algorithm(num_procs, proc_id, pi, num_iterations, num_threads);
         break;
 
     default:
@@ -87,7 +95,7 @@ void calculate_pi_gmp(int num_procs, int proc_id, int algorithm, int precision, 
     if (proc_id == 0) {  
         gettimeofday(&t2, NULL);
         execution_time = ((t2.tv_sec - t1.tv_sec) * 1000000u +  t2.tv_usec - t1.tv_usec)/1.e6; 
-        decimals_computed = check_decimals_gmp(pi);
+        decimals_computed = gmp_check_decimals(pi);
         if (print_in_csv_format) { 
             print_results_csv("GMP", algorithm_tag, precision, num_iterations, num_procs, num_threads, decimals_computed, execution_time); 
         } else { 
