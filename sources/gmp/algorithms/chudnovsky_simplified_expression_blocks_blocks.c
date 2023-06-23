@@ -47,7 +47,6 @@
 void gmp_chudnovsky_iteration(mpf_t pi, int n, mpf_t dep_a, mpf_t dep_b, mpf_t dep_c, mpf_t aux){
     mpf_mul(aux, dep_a, dep_c);
     mpf_div(aux, aux, dep_b);
-
     mpf_add(pi, pi, aux);
 }
 
