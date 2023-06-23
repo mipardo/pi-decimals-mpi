@@ -6,7 +6,6 @@
 #include "mpi.h"
 #include "algorithms/bbp_blocks_blocks.h"
 #include "algorithms/bellard_bit_shift_power_blocks_cyclic.h"
-#include "algorithms/bellard_recursive_power_blocks_cyclic.h"
 #include "algorithms/chudnovsky_simplified_expression_blocks_blocks.h"
 #include "check_decimals.h"
 #include "../common/printer.h"
@@ -51,13 +50,6 @@ void mpfr_calculate_pi(int num_procs, int proc_id, int algorithm, int precision,
         break;
 
     case 2:
-        num_iterations = precision / 3;
-        check_errors(num_procs, precision, num_iterations, num_threads, proc_id);
-        algorithm_tag = "MPFR-BEL-RCP-BLC-CYC";
-        mpfr_bellard_recursive_power_blocks_cyclic_algorithm(num_procs, proc_id, pi, num_iterations, num_threads, precision_bits);
-        break;
-
-    case 3:
         num_iterations = (precision + 14 - 1) / 14;  //Division por exceso
         check_errors(num_procs, precision, num_iterations, num_threads, proc_id);
         algorithm_tag = "MPFR-CHD-SME-BLC-BLC";
