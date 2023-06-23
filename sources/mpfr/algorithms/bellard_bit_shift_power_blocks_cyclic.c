@@ -73,7 +73,7 @@ void mpfr_bellard_bit_shift_power_blocks_cyclic_algorithm(int num_procs, int pro
         jump_dep_b = 10 * num_threads;
         mpfr_init2(dep_m, precision_bits);
         mpfr_mul_2exp(dep_m, ONE, 10 * (block_start + thread_id), MPFR_RNDN);
-        mpfr_div(dep_m, ONE, dep_m, MPFR_RNDN);
+        mpfr_pow_si(dep_m, dep_m, -1, MPFR_RNDN);
         if((thread_id + block_start) % 2 != 0) mpfr_neg(dep_m, dep_m, MPFR_RNDN);                 
         mpfr_inits2(precision_bits, a, b, c, d, e, f, g, aux, NULL);
 
@@ -83,7 +83,7 @@ void mpfr_bellard_bit_shift_power_blocks_cyclic_algorithm(int num_procs, int pro
             // Update dependencies for next iteration:
             next_i = i + num_threads;
             mpfr_mul_2exp(dep_m, ONE, 10 * next_i, MPFR_RNDN);
-            mpfr_div(dep_m, ONE, dep_m, MPFR_RNDN);
+            mpfr_pow_si(dep_m, dep_m, -1, MPFR_RNDN);
             if (next_i % 2 != 0) mpfr_neg(dep_m, dep_m, MPFR_RNDN);
             dep_a += jump_dep_a;
             dep_b += jump_dep_b;  

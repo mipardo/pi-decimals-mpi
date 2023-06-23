@@ -4,7 +4,6 @@
 #include <omp.h>
 #include "mpi.h"
 #include "../mpi_operations.h"
-#include "chudnovsky_simplified_expression_blocks_cyclic.h"
 
 #define A 13591409
 #define B 545140134
@@ -40,6 +39,44 @@
  *      dep_c(n) = (545140134n + 13591409) = dep_c(n - 1) + 545140134               *
  *                                                                                  *
  ************************************************************************************/
+
+
+/*
+ * An iteration of Chudnovsky formula
+ */
+void gmp_chudnovsky_iteration(mpf_t pi, int n, mpf_t dep_a, mpf_t dep_b, mpf_t dep_c, mpf_t aux){
+    mpf_mul(aux, dep_a, dep_c);
+    mpf_div(aux, aux, dep_b);
+
+    mpf_add(pi, pi, aux);
+}
+
+
+/*
+ * This method is used by ParallelChudnovskyAlgorithm procs
+ * for computing the first value of dep_a
+ */
+void gmp_init_dep_a(mpf_t dep_a, int block_start){
+    mpz_t factorial_n, dividend, divisor;
+    mpf_t float_dividend, float_divisor;
+    mpz_inits(factorial_n, dividend, divisor, NULL);
+    mpf_inits(float_dividend, float_divisor, NULL);
+
+    mpz_fac_ui(factorial_n, block_start);
+    mpz_fac_ui(divisor, 3 * block_start);
+    mpz_fac_ui(dividend, 6 * block_start);
+
+    mpz_pow_ui(factorial_n, factorial_n, 3);
+    mpz_mul(divisor, divisor, factorial_n);
+
+    mpf_set_z(float_dividend, dividend);
+    mpf_set_z(float_divisor, divisor);
+
+    mpf_div(dep_a, float_dividend, float_divisor);
+
+    mpz_clears(factorial_n, dividend, divisor, NULL);
+    mpf_clears(float_dividend, float_divisor, NULL);
+}
 
 
 void gmp_chudnovsky_simplified_expression_blocks_blocks_algorithm(int num_procs, int proc_id, mpf_t pi, int num_iterations, int num_threads){

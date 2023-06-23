@@ -6,10 +6,8 @@
 #include "mpi.h"
 #include "algorithms/bbp_blocks_cyclic.h"
 #include "algorithms/bellard_bit_shift_power_blocks_cyclic.h"
-#include "algorithms/chudnovsky_simplified_expression_blocks_cyclic.h"
 #include "algorithms/chudnovsky_simplified_expression_blocks_blocks.h"
 #include "algorithms/chudnovsky_simplified_expression_snake_like_blocks.h"
-#include "algorithms/chudnovsky_simplified_expression_cheater_blocks.h"
 #include "check_decimals.h"
 #include "../common/printer.h"
 
@@ -56,29 +54,15 @@ void gmp_calculate_pi(int num_procs, int proc_id, int algorithm, int precision, 
     case 2:
         num_iterations = (precision + 14 - 1) / 14;  //Division por exceso
         check_errors(num_procs, precision, num_iterations, num_threads, proc_id);
-        algorithm_tag = "GMP-CHD-SME-BLC-CYC";
-        gmp_chudnovsky_simplified_expression_blocks_cyclic_algorithm(num_procs, proc_id, pi, num_iterations, num_threads);
-        break;
-    
-    case 3:
-        num_iterations = (precision + 14 - 1) / 14;  //Division por exceso
-        check_errors(num_procs, precision, num_iterations, num_threads, proc_id);
         algorithm_tag = "GMP-CHD-SME-BLC-BLC";
         gmp_chudnovsky_simplified_expression_blocks_blocks_algorithm(num_procs, proc_id, pi, num_iterations, num_threads);
         break;
 
-    case 4:
+    case 3:
         num_iterations = (precision + 14 - 1) / 14;  //Division por exceso
         check_errors(num_procs, precision, num_iterations, num_threads, proc_id);
         algorithm_tag = "GMP-CHD-SME-SNK-BLC";
         gmp_chudnovsky_simplified_expression_snake_like_blocks_algorithm(num_procs, proc_id, pi, num_iterations, num_threads);
-        break;
-
-    case 5:
-        num_iterations = (precision + 14 - 1) / 14;  //Division por exceso
-        check_errors(num_procs, precision, num_iterations, num_threads, proc_id);
-        algorithm_tag = "GMP-CHD-SME-CHT-BLC";
-        gmp_chudnovsky_simplified_expression_cheater_blocks_algorithm(num_procs, proc_id, pi, num_iterations, num_threads);
         break;
 
     default:

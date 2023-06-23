@@ -4,7 +4,7 @@
 #include <omp.h>
 #include "mpi.h"
 #include "../mpi_operations.h"
-#include "chudnovsky_simplified_expression_blocks_cyclic.h"
+#include "chudnovsky_simplified_expression_blocks_blocks.h"
 
 #define A 13591409
 #define B 545140134
