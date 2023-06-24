@@ -16,11 +16,11 @@ int incorrect_params(char* exec_name){
 }
 
 int main(int argc, char **argv){    
-    int num_procs, proc_id;
+    int num_procs, proc_id, provided;
     bool print_in_csv_format; 
 
     //Init MPI
-    MPI_Init(&argc, &argv);
+    MPI_Init_thread(&argc, &argv,  MPI_THREAD_MULTIPLE, &provided);
     MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
     MPI_Comm_rank(MPI_COMM_WORLD, &proc_id); 
 
